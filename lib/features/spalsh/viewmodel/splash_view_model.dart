@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/storge/shared_preferences_helper.dart';
+import '../../../core/storge/token_storage.dart';
 import '../../home/view/tabs/home tab/home_tab.dart';
 import '../../onboarding/onboarding_screen.dart';
 import '../../setup/view/setup_flow_page.dart';
@@ -25,8 +26,10 @@ class SplashViewModel extends ChangeNotifier {
       return;
     }
 
-    // 2. هل المستخدم مسجل دخول؟
-    final isLoggedIn = await SharedPreferencesHelper.isLoggedIn();
+    // 2. هل فيه توكن مخزّن؟ (يعني المستخدم مسجل دخول قبل كده)
+    final tokenStorage = TokenStorage();
+    final token = await tokenStorage.getToken();
+    final isLoggedIn = token != null && token.isNotEmpty;
 
     if (!isLoggedIn) {
       nextRoute = OnBoardingScreen.routeName;
@@ -35,17 +38,17 @@ class SplashViewModel extends ChangeNotifier {
       return;
     }
 
-    // 3. مسجل دخول → هل هو مستخدم جديد (أول مرة يسجل)؟
-    final isNewUser = await SharedPreferencesHelper.isNewUser();
+    // 3. مسجل دخول → هل أكمل الـ Setup؟
+    final isSetupCompleted = await SharedPreferencesHelper.isSetupCompleted();
 
-    if (isNewUser) {
+    if (!isSetupCompleted) {
       nextRoute = SetupFlowPage.routeName;
       goNext = true;
       notifyListeners();
       return;
     }
 
-    // 4. مستخدم قديم → Home مباشرة
+    // 4. كل حاجة تمام → Home
     nextRoute = HomePage.routeName;
     goNext = true;
     notifyListeners();

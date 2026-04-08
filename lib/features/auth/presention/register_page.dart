@@ -12,6 +12,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/auth_background.dart';
 import '../../../core/diauth/service_locator.dart';
 import '../../../core/storge/shared_preferences_helper.dart';
+import '../../../core/storge/token_storage.dart';
 import '../../../core/utiles/color_manager.dart';
 import '../../../core/utiles/responsive_manager.dart';
 import '../../setup/view/setup_flow_page.dart';
@@ -98,15 +99,19 @@ class _RegisterPageState extends State<RegisterPage> {
                   // ✅ حفظ حالة تسجيل الدخول
                   await SharedPreferencesHelper.setLoggedIn(true);
 
-                  // ✅ أول مرة يسجل → يعمل Setup
-                  await SharedPreferencesHelper.setNewUserCompleted();
+                  // ✅ حفظ التوكن
+                  final tokenStorage = TokenStorage();
+                  await tokenStorage.saveAuth(
+                    token: state.user!.token,
+                    email: state.user!.email,
+                    userName: state.user!.userName,
+                  );
 
                   if (mounted) {
                     Navigator.pushReplacement(
                       context,
                       CustomPageTransitions.fastSlideTransition(
-                        const SetupFlowPage(),
-                      ),
+                          const SetupFlowPage()),
                     );
                   }
                 }

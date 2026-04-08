@@ -8,7 +8,7 @@ import '../../../core/utiles/color_manager.dart';
 import '../../auth/presention/login_page.dart';
 import '../../home/view/tabs/home tab/home_tab.dart';
 import '../../onboarding/onboarding_screen.dart';
-import '../../setup/view/setup_flow_page.dart';
+import '../../setup/view/setup_flow_page.dart'; // ✅ أضف هذا الاستيراد
 import '../../start screen/start_screen.dart';
 import '../viewmodel/splash_view_model.dart';
 import '../widgets/plash_fade_logo.dart';

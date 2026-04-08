@@ -1,6 +1,6 @@
 // lib/features/auth/presention/login_page.dart
 
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +13,7 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/auth_background.dart';
 import '../../../core/diauth/service_locator.dart';
 import '../../../core/storge/shared_preferences_helper.dart';
+import '../../../core/storge/token_storage.dart';
 import '../../../core/utiles/color_manager.dart';
 import '../../../core/utiles/responsive_manager.dart';
 import '../../home/view/tabs/home tab/home_tab.dart';
@@ -82,18 +83,28 @@ class _LoginPageState extends State<LoginPage> {
                   );
                   context.read<AuthCubit>().clearError();
                 }
+                // في BlocListener داخل login_page.dart
+
                 if (state.user != null) {
+                  // ✅ حفظ التوكن
+                  final tokenStorage = TokenStorage();
+                  await tokenStorage.saveAuth(
+                    token: state.user!.token,
+                    email: state.user!.email,
+                    userName: state.user!.userName,
+                  );
+
                   // ✅ حفظ حالة تسجيل الدخول
                   await SharedPreferencesHelper.setLoggedIn(true);
 
+                  // ✅ حفظ اكتمال الـ Setup
+                  await SharedPreferencesHelper.setSetupCompleted(true);
+
                   if (!mounted) return;
 
-                  // ✅ المستخدم القديم → Home مباشرة
                   Navigator.pushReplacement(
                     context,
-                    CustomPageTransitions.fastSlideTransition(
-                      const HomePage(),
-                    ),
+                    CustomPageTransitions.fastSlideTransition(const HomePage()),
                   );
                 }
               },

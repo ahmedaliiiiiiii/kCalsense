@@ -1,46 +1,51 @@
+// lib/core/storge/token_storage.dart
+
+// ignore_for_file: avoid_print
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenStorage {
-  static const _kToken = "token";
-  static const _kEmail = "email";
-  static const _kUserName = "userName";
+  static const String _tokenKey = 'auth_token';
+  static const String _emailKey = 'user_email';
+  static const String _userNameKey = 'user_name';
 
   Future<void> saveAuth({
     required String token,
     required String email,
     required String userName,
   }) async {
-    final sp = await SharedPreferences.getInstance();
-    await sp.setString(_kToken, token);
-    await sp.setString(_kEmail, email);
-    await sp.setString(_kUserName, userName);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, token);
+    await prefs.setString(_emailKey, email);
+    await prefs.setString(_userNameKey, userName);
+
+    print('✅ Token saved: $token');
+    print('✅ Email saved: $email');
+    print('✅ UserName saved: $userName');
   }
 
   Future<String?> getToken() async {
-    final sp = await SharedPreferences.getInstance();
-    return sp.getString(_kToken);
-  }
-
-  Future<String?> getUserName() async {
-    final sp = await SharedPreferences.getInstance();
-    return sp.getString(_kUserName);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_tokenKey);
+    print('📖 Getting token: $token');
+    return token;
   }
 
   Future<String?> getEmail() async {
-    final sp = await SharedPreferences.getInstance();
-    return sp.getString(_kEmail);
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_emailKey);
   }
 
-  Future<bool> isLoggedIn() async {
-    final sp = await SharedPreferences.getInstance();
-    final token = sp.getString(_kToken);
-    return token != null && token.isNotEmpty;
+  Future<String?> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userNameKey);
   }
 
   Future<void> clear() async {
-    final sp = await SharedPreferences.getInstance();
-    await sp.remove(_kToken);
-    await sp.remove(_kEmail);
-    await sp.remove(_kUserName);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_emailKey);
+    await prefs.remove(_userNameKey);
+    print('✅ All auth data cleared');
   }
 }
