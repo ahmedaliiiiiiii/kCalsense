@@ -1,0 +1,327 @@
+{
+  "settings": {
+    "title": "KCalsense",
+    "subtitle": "Customize Your Experience",
+    "language": "Language",
+    "dark_mode": "Dark Mode",
+    "continue": "Continue",
+    "skip": "Skip for now"
+  },
+  "home": {
+    "greeting": {
+      "today_progress": "Today's Progress",
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "night": "Good night",
+      "track_nutrition": "Let's track your nutrition today"
+    },
+    "quick_actions": "Quick Actions",
+    "recent_foods": "Recent Foods",
+    "see_all": "See All",
+    "scan_food": "Scan Food",
+    "ask_ai": "Ask AI",
+    "view_stats": "View Stats",
+    "manual_entry": "Manual Entry",
+    "calories": "calories",
+    "goal": "goal",
+    "Search_here": "Search here",
+    "Smart_Food_Suggestions": "Smart Food Suggestions"
+  },
+  "scan": {
+    "title": "Scan Your Food",
+    "subtitle": "Our AI will analyze the food and provide detailed nutritional information",
+    "image_selected": "Image Selected",
+    "ready_to_analyze": "Ready to analyze! Tap \"Analyze Food\" to get nutritional information",
+    "take_photo": "Take Photo",
+    "upload_gallery": "Upload from Gallery",
+    "analyze": "Analyze Food",
+    "choose_different": "Choose Different Image",
+    "or": "OR",
+    "analysis_results": "Analysis Results",
+    "nutritional_breakdown": "Nutritional breakdown based on the selected image",
+    "macros": "Macros",
+    "calories": "Calories",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "confidence": "Confidence",
+    "done": "Done"
+  },
+  "stats": {
+    "title": "Analytics",
+    "subtitle": "Track your nutrition journey",
+    "calories": "Calories",
+    "macros": "Macros",
+    "progress": "Progress",
+    "this_week": "This Week",
+    "this_month": "This Month",
+    "this_year": "This Year",
+    "total_calories": "Total Calories",
+    "daily_average": "Daily Average",
+    "total_days": "Total Days",
+    "current_streak": "Current Streak",
+    "daily_calories": "Daily Calories",
+    "your_calorie_intake": "Your calorie intake over time",
+    "macronutrient_distribution": "Macronutrient Distribution",
+    "total": "Total",
+    "goal_progress": "Goal Progress",
+    "track_progress": "Track your progress towards your goals",
+    "daily_calorie_goal": "Daily Calorie Goal",
+    "weekly_calorie_goal": "Weekly Calorie Goal",
+    "current": "Current",
+    "target": "Target",
+    "achievements": "Achievements",
+    "badges_earned": "Badges earned on your journey",
+    "streak_5_days": "5 Day Streak",
+    "goal_master": "Goal Master",
+    "protein_king": "Protein King",
+    "energy_boost": "Energy Boost",
+    "healthy_eater": "Healthy Eater",
+    "early_bird": "Early Bird"
+  },
+  "profile": {
+    "theme_dialog": {
+      "title": "Choose Theme",
+      "subtitle": "Select your preferred appearance",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "theme_option": {
+      "light": "Light Mode",
+      "light_desc": "Bright and clean interface",
+      "dark": "Dark Mode",
+      "dark_desc": "Easy on the eyes at night",
+      "system": "System Default",
+      "system_desc": "Follow your device settings"
+    },
+    "goal": {
+      "lose": "Lose Weight",
+      "maintain": "Maintain Weight",
+      "gain": "Gain Weight"
+    },
+    "edit": "Edit",
+    "edit_profile": "Edit Profile",
+    "basic_information": "Basic Information",
+    "current_goal": "Current Goal",
+    "app_settings": "App Settings",
+    "language": "Language",
+    "theme": "App Theme",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "help_center": "Help Center",
+    "sign_out": "Sign Out",
+    "sign_out_confirmation": "Are you sure you want to sign out?",
+    "cancel": "Cancel",
+    "years_old": "years old",
+    "cm_tall": "cm tall",
+    "kg_weight": "kg weight",
+    "bmi": "BMI",
+    "goal_subtitle": "Based on your body data and activity level",
+    "personal_information": "Personal Information",
+    "age": "Age",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "activity_level": "Activity Level",
+    "your_goal": "Your Goal",
+    "save_changes": "Save Changes",
+    "select_activity": "Select activity level",
+    "select_goal": "Select your goal",
+    "sedentary": "Sedentary (office job)",
+    "lightly_active": "Lightly Active (1-3 days/week)",
+    "moderately_active": "Moderately Active (3-5 days/week)",
+    "highly_active": "Highly Active (6-7 days/week)",
+    "lose_weight": "Lose Weight",
+    "maintain_weight": "Maintain Weight",
+    "gain_weight": "Gain Weight"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "meal_logged": "Meal Logged",
+    "meal_logged_message": "You logged",
+    "goal_achieved": "Goal Achieved",
+    "goal_achieved_message": "You reached your protein goal!",
+    "reminder": "Reminder",
+    "reminder_message": "Time to log your lunch",
+    "health_tip": "Health Tip",
+    "health_tip_message": "Drink water before meals",
+    "minutes_ago": "min ago",
+    "hour_ago": "hour ago",
+    "hours_ago": "hours ago",
+    "yesterday": "Yesterday"
+  },
+  "help_center": {
+    "title": "Help Center",
+    "search": "Search for help...",
+    "faq": "Frequently Asked Questions",
+    "how_to_scan": "How do I scan food?",
+    "how_to_scan_answer": "1. Tap on the Scan tab in the bottom navigation bar\n2. Take a photo or upload an image from your gallery\n3. Tap \"Analyze Food\" to get nutritional information\n4. The AI will identify the food and show calories, protein, carbs, and fat",
+    "accuracy": "How accurate is the food recognition?",
+    "accuracy_answer": "Our AI model is trained on thousands of food images and has a high accuracy rate (typically 85-95%). For best results, use clear, well-lit images with the food centered.",
+    "calorie_calculation": "How is my daily calorie goal calculated?",
+    "calorie_calculation_answer": "Your daily calorie goal is calculated using the Mifflin-St Jeor equation based on your:\n• Age, gender, height, and weight\n• Activity level (sedentary to highly active)\n• Weight goal (lose, maintain, or gain weight)",
+    "edit_profile": "Can I edit my profile information?",
+    "edit_profile_answer": "Yes! Go to the Profile tab and tap the \"Edit\" button next to your name.",
+    "data_security": "Is my data secure?",
+    "data_security_answer": "Absolutely! Your information is encrypted and stored securely. We never share your personal data with third parties without your consent.",
+    "delete_account": "How do I delete my account?",
+    "delete_account_answer": "To delete your account:\n1. Go to Profile → Settings\n2. Contact support at support@kcalsense.com\n3. Request account deletion",
+    "still_need_help": "Still need help?",
+    "contact_support": "Contact our support team and we'll get back to you within 24 hours.",
+    "email_us": "Email Us",
+    "visit_website": "Visit Website",
+    "copy_email": "Copy Email",
+    "close": "Close"
+  },
+  "privacy_policy": {
+    "title": "Privacy Policy",
+    "info_collect": "Information We Collect",
+    "info_collect_content": "We collect information you provide directly to us, such as when you create an account, update your profile, or use our services. This may include:\n\n• Personal information (name, email address, age, gender)\n• Health and fitness data (weight, height, activity level, calorie intake)\n• Food recognition images and analysis results\n• Usage data and preferences",
+    "how_we_use": "How We Use Your Information",
+    "how_we_use_content": "We use the information we collect to:\n\n• Provide, maintain, and improve our services\n• Calculate personalized calorie recommendations\n• Analyze food images to provide nutritional information\n• Track your progress and generate insights\n• Communicate with you about updates and features",
+    "data_security": "Data Security",
+    "data_security_content": "We take reasonable measures to help protect your personal information from loss, theft, misuse, unauthorized access, disclosure, alteration, and destruction. All data is encrypted during transmission using industry-standard SSL/TLS protocols.",
+    "data_sharing": "Data Sharing",
+    "data_sharing_content": "We do not sell, trade, or otherwise transfer your personal information to outside parties. This does not include trusted third parties who assist us in operating our app, conducting our business, or servicing you, as long as those parties agree to keep this information confidential.",
+    "your_rights": "Your Rights",
+    "your_rights_content": "You have the right to:\n\n• Access and update your personal information\n• Delete your account and associated data\n• Opt-out of certain data collection\n• Request a copy of your data",
+    "contact_us": "Contact Us",
+    "contact_us_content": "If you have any questions about this Privacy Policy, please contact us at:\n\nEmail: privacy@kcalsense.com\nWebsite: www.kcalsense.com/privacy",
+    "last_updated": "Last updated: January 1, 2024"
+  },
+  "ask_ai": {
+    "title": "Gemini Food AI",
+    "welcome": "Food & Nutrition AI",
+    "welcome_subtitle": "Ask me anything about food, recipes, and nutrition",
+    "input_hint": "Ask anything about food...",
+    "clear_conversation": "Clear conversation?",
+    "clear_warning": "This will delete all messages in this conversation.",
+    "clear": "Clear",
+    "connection_error": "Connection lost. Please check your internet! 🌐",
+    "quota_error": "The Magic AI is resting for a moment ✨. Please wait 60 seconds and try again.",
+    "ai_only_food": "I'm sorry, I can only assist with food-related topics and calorie tracking."
+  },
+  "food_detail": {
+    "food_details": "Food Details",
+    "description": "Description",
+    "nutrition_facts": "Nutrition Facts"
+  },
+  "language": {
+    "title": "Choose Your Language",
+    "subtitle": "Select your preferred language",
+    "english": "English",
+    "english_subtitle": "Select English",
+    "arabic": "العربية",
+    "arabic_subtitle": "اختر اللغة العربية",
+    "continue": "Continue with English"
+  },
+  "onboarding": {
+    "smart_scan": {
+      "title": "Smart Scan",
+      "description": "Quickly analyze any meal using advanced AI food recognition technology designed to detect ingredients and estimate calories in seconds"
+    },
+    "calories_estimation": {
+      "title": "Calories Estimation",
+      "description": "Your foods are automatically evaluated with precise calorie predictions, helping you understand what you eat with clear and simple insights"
+    },
+    "health_insight": {
+      "title": "Health Insight",
+      "description": "Track daily meals and nutritional information effortlessly, giving you a smarter way to stay aware of your eating habits and reach your goals"
+    },
+    "next": "NEXT",
+    "get_started": "GET STARTED",
+    "skip": "SKIP",
+    "back": "Back"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "no_account": "Don't have an account? ",
+      "sign_up": "Sign Up",
+      "email_hint": "Enter your Email",
+      "password_hint": "Enter Password",
+      "forget_password": "Forget password?",
+      "login_button": "LOGIN",
+      "loading": "LOADING...",
+      "invalid_email": "Invalid email format"
+    },
+    "register": {
+      "title": "Welcome to CalorieCalc AI",
+      "have_account": "Already have an account? ",
+      "sign_in": "Sign In",
+      "name_hint": "Enter your full name",
+      "email_hint": "Enter your Email",
+      "password_hint": "Enter Password",
+      "confirm_password_hint": "Confirm password",
+      "register_button": "REGISTER",
+      "loading": "LOADING...",
+      "invalid_email": "Invalid email format",
+      "password_requirements": "Must have upper, lower, symbol (@#) and 8+ chars",
+      "password_mismatch": "Passwords do not match"
+    },
+    "errors": {
+      "invalid_response": "Invalid response",
+      "network_error": "Network error, please check your connection",
+      "server_error": "Server error, please try again later",
+      "unauthorized": "Invalid email or password"
+    }
+  },
+  "setup": {
+    "common": {
+      "next": "NEXT",
+      "continue": "CONTINUE",
+      "try_again": "TRY AGAIN"
+    },
+    "gender": {
+      "title": "Gender",
+      "subtitle": "What's your gender?",
+      "male": "Male",
+      "female": "Female"
+    },
+    "age": {
+      "title": "Age",
+      "subtitle": "How old are you?",
+      "hint": "Enter your age"
+    },
+    "height": {
+      "title": "Height",
+      "subtitle": "Enter your height (cm)",
+      "hint": "e.g. 175"
+    },
+    "weight": {
+      "title": "Weight",
+      "subtitle": "Enter your weight (kg)",
+      "hint": "e.g. 72"
+    },
+    "activity": {
+      "title": "Activity Level",
+      "subtitle": "Choose your activity level",
+      "sedentary": "Sedentary (office job)",
+      "lightly_active": "Lightly Active (1-3 days/week)",
+      "moderately_active": "Moderately Active (3-5 days/week)",
+      "highly_active": "Highly Active (6-7 days/week)"
+    },
+    "goal": {
+      "title": "Weight Goal",
+      "subtitle": "What's your goal?",
+      "lose": "Lose Weight",
+      "maintain": "Maintain Weight",
+      "gain": "Gain Weight"
+    },
+    "metabolic": {
+      "title": "Metabolic Profile",
+      "subtitle": "Your estimated daily calories",
+      "maintenance": "Maintenance (AMR)",
+      "daily_target": "Daily Target",
+      "cal": "cal"
+    },
+    "done": {
+      "title": "All Set!",
+      "subtitle": "Your health plan is ready",
+      "button": "GET STARTED"
+    }
+  }
+}
