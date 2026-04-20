@@ -11,6 +11,7 @@ import 'core/diauth/service_locator.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/presention/cubit/authcubit_cubit.dart';
+import 'features/auth/presention/forget_password_page.dart';
 import 'features/auth/presention/login_page.dart';
 import 'features/home/view/tabs/home tab/home_tab.dart';
 import 'features/onboarding/onboarding_screen.dart';
@@ -61,6 +62,8 @@ class MyApp extends StatelessWidget {
               OnBoardingScreen.routeName: (context) => const OnBoardingScreen(),
               HomePage.routeName: (context) => const HomePage(),
               LoginPage.routeName: (context) => const LoginPage(),
+              ForgotPasswordPage.routeName: (context) =>
+                  const ForgotPasswordPage(),
               SetupFlowPage.routeName: (context) => const SetupFlowPage(),
             },
           );

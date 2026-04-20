@@ -19,6 +19,7 @@ import '../../../core/utiles/responsive_manager.dart';
 import '../../home/view/tabs/home tab/home_tab.dart';
 import 'cubit/authcubit_cubit.dart';
 import 'cubit/authcubit_state.dart';
+import 'forget_password_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -188,7 +189,13 @@ class _LoginPageState extends State<LoginPage> {
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      CustomPageTransitions.fastSlideTransition(
+                                          const ForgotPasswordPage()),
+                                    );
+                                  },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.symmetric(
                                       horizontal:

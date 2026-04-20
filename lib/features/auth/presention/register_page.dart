@@ -1,5 +1,3 @@
-// lib/features/auth/presention/register_page.dart
-
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:easy_localization/easy_localization.dart';
@@ -131,12 +129,43 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: ResponsiveManager.horizontalPadding,
+                            vertical: ResponsiveManager.spacingMedium,
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              SizedBox(height: ResponsiveManager.spacingSmall),
+                              Row(
+                                children: [
+                                  Align(
+                                    alignment: AlignmentDirectional.topStart,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: ColorManager.primaryColor
+                                            .withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        icon: Icon(
+                                          Icons.arrow_back_ios_new_rounded,
+                                          size: ResponsiveManager.iconMedium,
+                                          color: ColorManager.primaryColor,
+                                        ),
+                                        padding: EdgeInsets.all(
+                                            ResponsiveManager.spacingXSmall),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const Spacer(),
+                              SizedBox(height: ResponsiveManager.spacingMedium),
+
+                              // عنوان الصفحة
                               Text(
                                 "auth.register.title".tr(),
                                 textAlign: TextAlign.center,
@@ -146,7 +175,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
+
                               SizedBox(height: ResponsiveManager.spacingSmall),
+
+                              // رابط تسجيل الدخول
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -184,13 +216,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                 ],
                               ),
+
                               SizedBox(
                                   height: ResponsiveManager.spacingXXLarge),
+
+                              // حقل الاسم
                               AppTextField(
                                 controller: name,
                                 hint: "auth.register.name_hint".tr(),
                               ),
+
                               SizedBox(height: ResponsiveManager.spacingMedium),
+
+                              // حقل الإيميل
                               AppTextField(
                                 controller: email,
                                 hint: "auth.register.email_hint".tr(),
@@ -198,7 +236,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                 onChanged: validateEmail,
                                 errorText: emailError,
                               ),
+
                               SizedBox(height: ResponsiveManager.spacingMedium),
+
+                              // حقل كلمة المرور
                               AppTextField(
                                 controller: password,
                                 hint: "auth.register.password_hint".tr(),
@@ -206,7 +247,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                 onChanged: validatePassword,
                                 errorText: passError,
                               ),
+
                               SizedBox(height: ResponsiveManager.spacingMedium),
+
+                              // حقل تأكيد كلمة المرور
                               AppTextField(
                                 controller: confirm,
                                 hint:
@@ -215,7 +259,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                 onChanged: validateConfirm,
                                 errorText: confirmError,
                               ),
+
                               SizedBox(height: ResponsiveManager.spacingXLarge),
+
+                              // زر التسجيل
                               BlocBuilder<AuthCubit, AuthState>(
                                 builder: (context, state) {
                                   bool hasErrors = emailError != null ||
@@ -245,6 +292,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   );
                                 },
                               ),
+
+                              const Spacer(),
                               SizedBox(height: ResponsiveManager.spacingLarge),
                             ],
                           ),
