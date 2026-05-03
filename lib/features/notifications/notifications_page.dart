@@ -1,9 +1,56 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/features/notifications/NotificationHelper.dart';
 
-class NotificationsPage extends StatelessWidget {
+class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
+
+  @override
+  State<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  List<Map<String, dynamic>> _notifications = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationsAndMarkRead();
+  }
+
+  Future<void> _loadNotificationsAndMarkRead() async {
+    setState(() => _isLoading = true);
+
+    // تعليم جميع الإشعارات كمقروءة
+    await NotificationHelper.markAllAsRead();
+
+    // تحميل الإشعارات
+    final notifications = await NotificationHelper.getNotifications();
+
+    setState(() {
+      _notifications = notifications;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _clearAll() async {
+    await NotificationHelper.clearAll();
+    await _loadNotificationsAndMarkRead();
+  }
+
+  String _getTimeAgo(DateTime timestamp) {
+    final now = DateTime.now();
+    final diff = now.difference(timestamp);
+
+    if (diff.inSeconds < 60) return "الآن";
+    if (diff.inMinutes < 60) return "${diff.inMinutes} دقيقة مضت";
+    if (diff.inHours < 24) return "${diff.inHours} ساعة مضت";
+    if (diff.inDays < 7) return "${diff.inDays} يوم مضت";
+    if (diff.inDays < 30) return "${(diff.inDays / 7).floor()} أسبوع مضت";
+    return DateFormat('dd/MM/yyyy').format(timestamp);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,56 +79,57 @@ class NotificationsPage extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-      ),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.all(w * 0.04),
-        children: [
-          _buildNotificationItem(
-            context,
-            icon: Icons.fastfood,
-            title: "notifications.meal_logged".tr(),
-            message:
-                "${"notifications.meal_logged_message".tr()} 2,350 ${"home.calories".tr()}",
-            time: "2 ${"notifications.minutes_ago".tr()}",
-            isNew: true,
-          ),
-          _buildNotificationItem(
-            context,
-            icon: Icons.emoji_events,
-            title: "notifications.goal_achieved".tr(),
-            message: "notifications.goal_achieved_message".tr(),
-            time: "1 ${"notifications.hour_ago".tr()}",
-            isNew: true,
-          ),
-          _buildNotificationItem(
-            context,
-            icon: Icons.info_outline,
-            title: "notifications.reminder".tr(),
-            message: "notifications.reminder_message".tr(),
-            time: "3 ${"notifications.hours_ago".tr()}",
-            isNew: false,
-          ),
-          _buildNotificationItem(
-            context,
-            icon: Icons.tips_and_updates,
-            title: "notifications.health_tip".tr(),
-            message: "notifications.health_tip_message".tr(),
-            time: "notifications.yesterday".tr(),
-            isNew: false,
-          ),
+        actions: [
+          if (_notifications.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: context.lightGrey),
+              onPressed: _clearAll,
+            ),
         ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _notifications.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.notifications_none,
+                          size: 80, color: context.lightGrey),
+                      SizedBox(height: 16),
+                      Text(
+                        "notifications.no_notifications".tr(),
+                        style:
+                            TextStyle(color: context.lightGrey, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.all(w * 0.04),
+                  itemCount: _notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = _notifications[index];
+                    final timestamp = DateTime.parse(notification['timestamp']);
+                    final timeAgo = _getTimeAgo(timestamp);
+                    // جميع الإشعارات مقروءة الآن، لذا isNew = false
+                    return _buildNotificationItem(
+                      context,
+                      title: notification['title'],
+                      message: notification['body'],
+                      time: timeAgo,
+                    );
+                  },
+                ),
     );
   }
 
   Widget _buildNotificationItem(
     BuildContext context, {
-    required IconData icon,
     required String title,
     required String message,
     required String time,
-    required bool isNew,
   }) {
     final w = MediaQuery.of(context).size.width;
 
@@ -89,15 +137,9 @@ class NotificationsPage extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(w * 0.03),
       decoration: BoxDecoration(
-        color: isNew
-            ? context.primaryColor.withOpacity(0.05)
-            : context.surfaceColor,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(w * 0.03),
-        border: Border.all(
-          color: isNew
-              ? context.primaryColor.withOpacity(0.3)
-              : context.dividerColor,
-        ),
+        border: Border.all(color: context.dividerColor),
       ),
       child: Row(
         children: [
@@ -109,7 +151,7 @@ class NotificationsPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(w * 0.03),
             ),
             child: Icon(
-              icon,
+              Icons.notifications_active,
               color: context.primaryColor,
               size: w * 0.06,
             ),
@@ -119,28 +161,13 @@ class NotificationsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: w * 0.04,
-                        fontWeight: FontWeight.w700,
-                        color: context.textColor,
-                      ),
-                    ),
-                    if (isNew) ...[
-                      SizedBox(width: w * 0.02),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: w * 0.04,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                  ),
                 ),
                 SizedBox(height: 4),
                 Text(

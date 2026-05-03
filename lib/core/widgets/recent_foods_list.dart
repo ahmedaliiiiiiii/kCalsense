@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
+import '../../../core/utiles/color_manager.dart';
 import '../../features/home/model/home_models.dart';
-import '../utiles/color_manager.dart';
-import '../utiles/responsive_manager.dart';
 
 class RecentFoodsList extends StatelessWidget {
   final List<RecentFoodUiModel> items;
@@ -11,6 +12,30 @@ class RecentFoodsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        alignment: Alignment.center,
+        child: Column(
+          children: [
+            Icon(Icons.restaurant_outlined,
+                size: 48, color: context.lightGrey.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            Text(
+              "No recent foods yet",
+              style: TextStyle(fontSize: 16, color: context.lightGrey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Scan a meal to see it here",
+              style: TextStyle(
+                  fontSize: 14, color: context.lightGrey.withOpacity(0.8)),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       children: items.map((e) => _RecentFoodTile(item: e)).toList(),
     );
@@ -24,38 +49,40 @@ class _RecentFoodTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ResponsiveManager.init(context);
+    final size = MediaQuery.of(context).size;
+    final w = size.width;
+    final h = size.height;
+
+    final imgW = (w * 0.3).clamp(46.0, 66.0);
+    final imgH = (h * 0.1).clamp(38.0, 54.0);
+    final pad = w * 0.03;
+    final gap = w * 0.025;
+
+    final nameSize = (w * 0.038).clamp(12.0, 16.0);
+    final timeSize = (w * 0.032).clamp(10.0, 13.0);
+    final badgeSize = (w * 0.03).clamp(10.0, 12.0);
 
     return Container(
-      margin: EdgeInsets.only(bottom: ResponsiveManager.spacingMedium),
-      padding: EdgeInsets.all(ResponsiveManager.spacingMedium),
+      margin: EdgeInsets.only(bottom: h * 0.012),
+      padding: EdgeInsets.all(pad),
       decoration: BoxDecoration(
         color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: context.cardShadow,
-            blurRadius: ResponsiveManager.spacingLarge,
-            offset: Offset(0, ResponsiveManager.spacingSmall),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
-        border: Border.all(color: context.dividerColor),
       ),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(ResponsiveManager.radiusMedium),
-            child: (item.imageAsset == null)
-                ? _fallback(context)
-                : Image.asset(
-                    item.imageAsset!,
-                    width: 60.w,
-                    height: 60.w,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _fallback(context),
-                  ),
+            borderRadius: BorderRadius.circular(12),
+            child: _buildImage(imgW, imgH, w, context),
           ),
-          SizedBox(width: ResponsiveManager.spacingMedium),
+          SizedBox(width: gap),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,35 +92,32 @@ class _RecentFoodTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: ResponsiveManager.bodyMedium,
+                    fontSize: nameSize,
                     fontWeight: FontWeight.w800,
                     color: context.textColor,
                   ),
                 ),
-                SizedBox(height: ResponsiveManager.spacingXSmall),
+                SizedBox(height: h * 0.003),
                 Text(
                   item.time,
                   style: TextStyle(
-                    fontSize: ResponsiveManager.bodySmall,
-                    color: context.textSecondaryColor,
+                    fontSize: timeSize,
+                    color: context.lightGrey,
                   ),
                 ),
               ],
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: ResponsiveManager.spacingMedium,
-              vertical: ResponsiveManager.spacingXSmall,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: context.dividerColor,
-              borderRadius: BorderRadius.circular(999),
+              color: context.disabledColor.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               "${item.calories} cal",
               style: TextStyle(
-                fontSize: ResponsiveManager.caption,
+                fontSize: badgeSize,
                 fontWeight: FontWeight.w700,
                 color: context.textColor,
               ),
@@ -104,19 +128,35 @@ class _RecentFoodTile extends StatelessWidget {
     );
   }
 
-  Widget _fallback(BuildContext context) {
+  Widget _buildImage(double imgW, double imgH, double w, BuildContext context) {
+    if (item.imagePath.isNotEmpty && File(item.imagePath).existsSync()) {
+      return Image.file(
+        File(item.imagePath),
+        width: imgW,
+        height: imgH,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _fallbackImage(imgW, imgH, w, context);
+        },
+      );
+    }
+    return _fallbackImage(imgW, imgH, w, context);
+  }
+
+  Widget _fallbackImage(
+      double imgW, double imgH, double w, BuildContext context) {
     return Container(
-      width: 60.w,
-      height: 60.w,
+      width: imgW,
+      height: imgH,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: context.dividerColor,
-        borderRadius: BorderRadius.circular(ResponsiveManager.radiusMedium),
+        color: item.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(w * 0.035),
       ),
       child: Icon(
         Icons.fastfood,
-        size: ResponsiveManager.iconMedium,
-        color: context.lightGrey,
+        size: (w * 0.05).clamp(16.0, 22.0),
+        color: item.color,
       ),
     );
   }

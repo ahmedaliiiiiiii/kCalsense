@@ -1,23 +1,63 @@
-// lib/features/home/tabs/home tab/foods_screen.dart
+import 'dart:async';
+import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../../core/navigation/page_transitions.dart';
+import '../../../../../../core/utiles/color_manager.dart';
+import '../../../../../../core/utiles/responsive_manager.dart';
+import '../../../../model/home_models.dart';
+import '../../../../viewmodel/homeviewmodel.dart';
 import 'food_detail_screen.dart';
 
-class FoodsScreen extends StatelessWidget {
+class FoodsScreen extends StatefulWidget {
   const FoodsScreen({super.key});
 
   @override
+  State<FoodsScreen> createState() => _FoodsScreenState();
+}
+
+class _FoodsScreenState extends State<FoodsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  Timer? _debounceTimer;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _searchQuery = value;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ResponsiveManager.init(context);
+
+    final homeVm = Provider.of<HomeViewModel>(context);
+    final allFoods = homeVm.recentFoods;
+
+    final filteredFoods = _searchQuery.isEmpty
+        ? allFoods
+        : allFoods
+            .where((food) =>
+                food.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+            .toList();
+
     return Scaffold(
       backgroundColor: context.backgroundColor,
       body: CustomScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
+        physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
             backgroundColor: context.surfaceColor,
@@ -25,7 +65,7 @@ class FoodsScreen extends StatelessWidget {
             scrolledUnderElevation: 0,
             pinned: true,
             floating: true,
-            toolbarHeight: 60,
+            toolbarHeight: 65,
             leading: IconButton(
               icon: Icon(Icons.arrow_back_ios_new, color: context.iconColor),
               onPressed: () => Navigator.pop(context),
@@ -40,15 +80,113 @@ class FoodsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildSectionTitle(context, "home.recent_foods".tr()),
                 const SizedBox(height: 16),
-                ..._buildFoodList(context, _getRecentFoods()),
-                const SizedBox(height: 16),
-                _buildSectionTitle(context, "home.Smart_Food_Suggestions".tr()),
-                const SizedBox(height: 16),
-                ..._buildFoodList(context, _getSuggestions()),
-                const SizedBox(height: 20),
+                if (filteredFoods.isNotEmpty)
+                  ..._buildFoodListFromModel(context, filteredFoods)
+                else if (_searchQuery.isNotEmpty)
+                  _buildEmptyState(
+                      context,
+                      "No results found for '$_searchQuery'",
+                      Icons.search_off_rounded)
+                else
+                  _buildEmptyState(context, "home.no_recent_foods".tr(),
+                      Icons.restaurant_outlined),
+                const SizedBox(height: 80),
               ]),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    return Container(
+      height: 45,
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: context.dividerColor, width: 0.5),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        decoration: InputDecoration(
+          hintText: "home.Search_here".tr(),
+          hintStyle: TextStyle(
+            color: context.lightGrey,
+            fontSize: 14,
+          ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: context.lightGrey,
+            size: 20,
+          ),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _searchController.clear();
+                      _searchQuery = '';
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: context.lightGrey.withOpacity(0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, String message, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60),
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Icon(icon, size: 56, color: context.lightGrey.withOpacity(0.5)),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 16,
+              color: context.lightGrey,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          if (message == "home.no_recent_foods".tr())
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                final homeVm =
+                    Provider.of<HomeViewModel>(context, listen: false);
+                homeVm.changeTab(1);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                elevation: 0,
+              ),
+              child: Text("home.scan_meal".tr()),
+            ),
         ],
       ),
     );
@@ -58,235 +196,101 @@ class FoodsScreen extends StatelessWidget {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: FontWeight.w700,
         color: context.textColor,
       ),
     );
   }
 
-  Widget _buildSearchBar(BuildContext context) {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadow,
-            blurRadius: 5,
-            spreadRadius: 0.5,
-          ),
-        ],
-      ),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: "home.Search_here".tr(),
-          hintStyle: TextStyle(color: context.textHintColor),
-          prefixIcon: Icon(Icons.search, color: context.textHintColor),
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        ),
-      ),
-    );
-  }
-
-  List<Map<String, dynamic>> _getRecentFoods() {
-    return const [
-      {
-        'name': 'Apple',
-        'weight': '800 gr',
-        'calories': '83 cal',
-        'color': Color(0xFFFF6B6B),
-        'imagePath': 'assets/pictures/apple.png'
-      },
-      {
-        'name': 'Pizza',
-        'weight': '1100 gr',
-        'calories': '350 cal',
-        'color': Color(0xFFFFD166),
-        'imagePath': 'assets/pictures/pizza.png'
-      },
-      {
-        'name': 'Burger',
-        'weight': '1300 gr',
-        'calories': '200 cal',
-        'color': Color(0xFF4ECDC4),
-        'imagePath': 'assets/pictures/burger.png'
-      },
-      {
-        'name': 'Salad',
-        'weight': '1000 gr',
-        'calories': '100 cal',
-        'color': Color(0xFF42E87F),
-        'imagePath': 'assets/pictures/salad.png'
-      },
-    ];
-  }
-
-  List<Map<String, dynamic>> _getSuggestions() {
-    return const [
-      {
-        'name': 'Rice',
-        'weight': '2200 gr',
-        'calories': '80 cal',
-        'color': Color(0xFF9D4EDD),
-        'imagePath': 'assets/pictures/rice.png'
-      },
-      {
-        'name': 'Chicken',
-        'weight': '1100 gr',
-        'calories': '390 cal',
-        'color': Color(0xFF4ECDC4),
-        'imagePath': 'assets/pictures/chicken.png'
-      },
-      {
-        'name': 'Pasta',
-        'weight': '1200 gr',
-        'calories': '200 cal',
-        'color': Color(0xFFFFD166),
-        'imagePath': 'assets/pictures/pasta.png'
-      },
-      {
-        'name': 'Peanut Butter',
-        'weight': '1500 gr',
-        'calories': '100 cal',
-        'color': Color(0xFFF8961E),
-        'imagePath': 'assets/pictures/peanut_butter.png'
-      },
-      {
-        'name': 'Lasagna',
-        'weight': '500 gr',
-        'calories': '100 cal',
-        'color': Color(0xFFFF6B6B),
-        'imagePath': 'assets/pictures/lasagna.png'
-      },
-    ];
-  }
-
-  List<Widget> _buildFoodList(
-      BuildContext context, List<Map<String, dynamic>> foods) {
+  List<Widget> _buildFoodListFromModel(
+      BuildContext context, List<RecentFoodUiModel> foods) {
     return foods
-        .map((food) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _buildFoodCard(
+        .asMap()
+        .entries
+        .map((entry) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildFoodCardFromModel(
                 context,
-                name: food['name'] as String,
-                weight: food['weight'] as String,
-                calories: food['calories'] as String,
-                color: food['color'] as Color,
-                imagePath: food['imagePath'] as String,
+                food: entry.value,
+                index: entry.key,
               ),
             ))
         .toList();
   }
 
-  Widget _buildFoodCard(
+  Widget _buildFoodCardFromModel(
     BuildContext context, {
-    required String name,
-    required String weight,
-    required String calories,
-    required Color color,
-    required String imagePath,
+    required RecentFoodUiModel food,
+    required int index,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: context.cardShadow,
-            blurRadius: 8,
-            spreadRadius: 1,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           onTap: () {
-            final foodData = _getFoodData(name);
             context.pushWithTransition(
-              FoodDetailScreen(
-                name: foodData['name'] as String,
-                time: 'Recent',
-                calories: foodData['calories'] as String,
-                color: foodData['color'] as Color,
-                imagePath: foodData['imagePath'] as String,
-                description: foodData['description'] as String,
-                nutrition: foodData['nutrition'] as Map<String, String>,
-              ),
-              type: TransitionType.fromBottom, // ✅ تم التصحيح
+              FoodDetailScreen(meal: food), // ✅ تمرير الكائن الكامل
+              type: TransitionType.fromBottom,
             );
           },
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: color.withOpacity(0.1),
-                          child: Center(
-                            child: Icon(
-                              _getFoodIcon(name),
-                              color: color,
-                              size: 28,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
+                _buildFoodImage(food.imagePath, food.color),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        food.name,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: context.textColor,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        weight,
+                        food.weight,
                         style: TextStyle(
-                          fontSize: 14,
-                          color: context.textSecondaryColor,
+                          fontSize: 13,
+                          color: context.lightGrey,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      calories,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: context.textColor,
-                      ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                      color: food.color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Text(
+                    '${food.calories} cal',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: food.color,
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -296,140 +300,34 @@ class FoodsScreen extends StatelessWidget {
     );
   }
 
-  Map<String, dynamic> _getFoodData(String foodName) {
-    switch (foodName.toLowerCase()) {
-      case 'apple':
-        return {
-          'name': 'Apple',
-          'calories': '83 cal',
-          'color': const Color(0xFFFF6B6B),
-          'imagePath': 'assets/pictures/apple.png',
-          'description':
-              'An apple is a popular, healthy, low-calorie fruit, rich in fiber and essential vitamins like Vitamin C.',
-          'nutrition': {
-            'calories': '83 kcal',
-            'protein': '0.4g',
-            'carbs': '22g',
-            'fat': '0.2g',
-            'fiber': '4g',
-            'sugar': '17g'
+  Widget _buildFoodImage(String imagePath, Color color) {
+    if (imagePath.isNotEmpty && File(imagePath).existsSync()) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.file(
+          File(imagePath),
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _fallbackImage(color);
           },
-        };
-      case 'pizza':
-        return {
-          'name': 'Pizza',
-          'calories': '350 cal',
-          'color': const Color(0xFFFFD166),
-          'imagePath': 'assets/pictures/pizza.png',
-          'description':
-              'Pizza is a popular dish of Italian origin consisting of a flat, round base of dough baked with various toppings.',
-          'nutrition': {
-            'calories': '350 kcal',
-            'protein': '15g',
-            'carbs': '40g',
-            'fat': '14g',
-            'fiber': '3g',
-            'sugar': '5g'
-          },
-        };
-      case 'burger':
-        return {
-          'name': 'Burger',
-          'calories': '200 cal',
-          'color': const Color(0xFF4ECDC4),
-          'imagePath': 'assets/pictures/burger.png',
-          'description':
-              'A hamburger is a sandwich consisting of one or more cooked patties of ground meat, usually beef.',
-          'nutrition': {
-            'calories': '200 kcal',
-            'protein': '14g',
-            'carbs': '20g',
-            'fat': '10g',
-            'fiber': '2g',
-            'sugar': '4g'
-          },
-        };
-      case 'salad':
-        return {
-          'name': 'Salad',
-          'calories': '100 cal',
-          'color': const Color(0xFF42E87F),
-          'imagePath': 'assets/pictures/salad.png',
-          'description':
-              'A salad is a dish consisting of mixed, mostly natural ingredients with at least one raw ingredient.',
-          'nutrition': {
-            'calories': '100 kcal',
-            'protein': '3g',
-            'carbs': '10g',
-            'fat': '6g',
-            'fiber': '4g',
-            'sugar': '5g'
-          },
-        };
-      case 'rice':
-        return {
-          'name': 'Rice',
-          'calories': '80 cal',
-          'color': const Color(0xFF9D4EDD),
-          'imagePath': 'assets/pictures/rice.png',
-          'description':
-              'Rice is the most widely consumed staple food for a large part of the world\'s human population.',
-          'nutrition': {
-            'calories': '80 kcal',
-            'protein': '2g',
-            'carbs': '18g',
-            'fat': '0.5g',
-            'fiber': '0.6g',
-            'sugar': '0g'
-          },
-        };
-      case 'chicken':
-        return {
-          'name': 'Chicken',
-          'calories': '390 cal',
-          'color': const Color(0xFF4ECDC4),
-          'imagePath': 'assets/pictures/chicken.png',
-          'description':
-              'Chicken is a type of poultry, and is one of the most common types of meat in the world.',
-          'nutrition': {
-            'calories': '390 kcal',
-            'protein': '35g',
-            'carbs': '0g',
-            'fat': '25g',
-            'fiber': '0g',
-            'sugar': '0g'
-          },
-        };
-      default:
-        return {
-          'name': foodName,
-          'calories': '100 cal',
-          'color': const Color(0xFF42E87F),
-          'imagePath': 'assets/pictures/apple.png',
-          'description': 'Detailed information about $foodName.',
-          'nutrition': {
-            'calories': '100 kcal',
-            'protein': '5g',
-            'carbs': '15g',
-            'fat': '3g',
-            'fiber': '2g',
-            'sugar': '5g'
-          },
-        };
+        ),
+      );
     }
+    return _fallbackImage(color);
   }
 
-  IconData _getFoodIcon(String foodName) {
-    final name = foodName.toLowerCase();
-    if (name.contains('apple')) return Icons.apple;
-    if (name.contains('pizza')) return Icons.local_pizza;
-    if (name.contains('burger')) return Icons.lunch_dining;
-    if (name.contains('salad')) return Icons.eco;
-    if (name.contains('chicken')) return Icons.kebab_dining;
-    if (name.contains('pasta')) return Icons.dinner_dining;
-    if (name.contains('peanut')) return Icons.egg_alt;
-    if (name.contains('lasagna')) return Icons.restaurant;
-    if (name.contains('rice')) return Icons.rice_bowl;
-    return Icons.fastfood;
+  Widget _fallbackImage(Color color) {
+    return Container(
+      width: 60,
+      height: 60,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(Icons.fastfood_rounded, size: 28, color: color),
+    );
   }
 }

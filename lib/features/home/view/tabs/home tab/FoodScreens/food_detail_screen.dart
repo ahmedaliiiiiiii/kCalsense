@@ -1,30 +1,18 @@
-// lib/features/home/screens/food_detail_screen.dart
+import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../../core/utiles/responsive_manager.dart';
+import '../../../../model/home_models.dart';
+import '../../../../viewmodel/homeviewmodel.dart';
 
 class FoodDetailScreen extends StatelessWidget {
-  final String name;
-  final String time;
-  final String calories;
-  final Color color;
-  final String imagePath;
-  final String description;
-  final Map<String, String> nutrition;
+  final RecentFoodUiModel meal;
 
-  const FoodDetailScreen({
-    super.key,
-    required this.name,
-    required this.time,
-    required this.calories,
-    required this.color,
-    required this.imagePath,
-    required this.description,
-    required this.nutrition,
-  });
+  const FoodDetailScreen({super.key, required this.meal});
 
   @override
   Widget build(BuildContext context) {
@@ -47,104 +35,117 @@ class FoodDetailScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
+            onPressed: () => _showDeleteConfirmation(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.all(ResponsiveManager.spacingLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildFoodHeaderCard(context),
-            SizedBox(height: ResponsiveManager.spacingXLarge),
+            const SizedBox(height: 24),
             _buildDescriptionSection(context),
-            SizedBox(height: ResponsiveManager.spacingXLarge),
+            const SizedBox(height: 24),
             _buildNutritionFactsSection(context),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFoodHeaderCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadow,
-            blurRadius: 15,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete Meal'),
+        content: Text('Are you sure you want to delete "${meal.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final homeVm = Provider.of<HomeViewModel>(context, listen: false);
+              await homeVm.deleteMeal(meal);
+              if (context.mounted) Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text('Delete'),
           ),
         ],
       ),
-      padding: EdgeInsets.all(ResponsiveManager.spacingXLarge),
+    );
+  }
+
+  Widget _buildFoodHeaderCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: context.cardShadow,
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-          Container(
-            width: ResponsiveManager.imageLarge,
-            height: ResponsiveManager.imageLarge,
-            decoration: BoxDecoration(
-              borderRadius:
-                  BorderRadius.circular(ResponsiveManager.radiusMedium),
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-            child: ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(ResponsiveManager.radiusMedium),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: color.withOpacity(0.1),
-                    child: Center(
-                      child: Icon(
-                        _getFoodIcon(name),
-                        color: color,
-                        size: ResponsiveManager.iconXLarge,
-                      ),
+            child: _buildFoodImage(context),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Text(
+                  meal.name,
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    color: context.textColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  meal.time,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: context.lightGrey,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: meal.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  child: Text(
+                    '${meal.calories} cal',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: meal.color,
                     ),
-                  );
-                },
-              ),
-            ),
-          ),
-          SizedBox(height: ResponsiveManager.spacingLarge),
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: ResponsiveManager.heading3,
-              fontWeight: FontWeight.w700,
-              color: context.textColor,
-            ),
-          ),
-          SizedBox(height: ResponsiveManager.spacingSmall),
-          Text(
-            time,
-            style: TextStyle(
-              fontSize: ResponsiveManager.bodyMedium,
-              color: context.textSecondaryColor,
-            ),
-          ),
-          SizedBox(height: ResponsiveManager.spacingLarge),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: ResponsiveManager.spacingXLarge,
-              vertical: ResponsiveManager.spacingMedium,
-            ),
-            decoration: BoxDecoration(
-              color: context.primaryColor.withOpacity(0.1),
-              borderRadius:
-                  BorderRadius.circular(ResponsiveManager.radiusMedium),
-            ),
-            child: Text(
-              calories,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: context.primaryColor,
-              ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -152,38 +153,51 @@ class FoodDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDescriptionSection(BuildContext context) {
+  Widget _buildFoodImage(BuildContext context) {
+    if (meal.imagePath.isNotEmpty && File(meal.imagePath).existsSync()) {
+      return Image.file(
+        File(meal.imagePath),
+        width: double.infinity,
+        height: 220,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _fallbackImage(context);
+        },
+      );
+    }
+    return _fallbackImage(context);
+  }
+
+  Widget _fallbackImage(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadow,
-            blurRadius: 15,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(ResponsiveManager.spacingXLarge),
+      width: double.infinity,
+      height: 220,
+      alignment: Alignment.center,
+      color: meal.color.withOpacity(0.1),
+      child: Icon(Icons.fastfood_rounded, size: 60, color: meal.color),
+    );
+  }
+
+  Widget _buildDescriptionSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "food_detail.description".tr(),
             style: TextStyle(
-              fontSize: ResponsiveManager.heading4,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               color: context.textColor,
             ),
           ),
-          SizedBox(height: ResponsiveManager.spacingMedium),
+          const SizedBox(height: 12),
           Text(
-            description,
+            meal.description,
             style: TextStyle(
-              fontSize: ResponsiveManager.bodyMedium,
-              color: context.textSecondaryColor,
+              fontSize: 15,
+              color: context.lightGrey,
               height: 1.5,
             ),
           ),
@@ -193,96 +207,108 @@ class FoodDetailScreen extends StatelessWidget {
   }
 
   Widget _buildNutritionFactsSection(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadow,
-            blurRadius: 15,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(ResponsiveManager.spacingXLarge),
+    final nutritionItems = [
+      {
+        'label': "scan.calories".tr(),
+        'value': meal.nutrition['calories'] ?? '0',
+        'color': context.primaryColor,
+      },
+      {
+        'label': "scan.protein".tr(),
+        'value': meal.nutrition['protein'] ?? '0g',
+        'color': const Color(0xFF4ECDC4),
+      },
+      {
+        'label': "scan.carbs".tr(),
+        'value': meal.nutrition['carbs'] ?? '0g',
+        'color': const Color(0xFFFFD166),
+      },
+      {
+        'label': "scan.fat".tr(),
+        'value': meal.nutrition['fat'] ?? '0g',
+        'color': const Color(0xFFFF6B6B),
+      },
+      {
+        'label': "Fiber",
+        'value': meal.nutrition['fiber'] ?? '0g',
+        'color': const Color(0xFF9D4EDD),
+      },
+      {
+        'label': "Sugar",
+        'value': meal.nutrition['sugar'] ?? '0g',
+        'color': const Color(0xFFF8961E),
+      },
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "food_detail.nutrition_facts".tr(),
             style: TextStyle(
-              fontSize: ResponsiveManager.heading4,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               color: context.textColor,
             ),
           ),
-          SizedBox(height: ResponsiveManager.spacingLarge),
-          GridView.count(
+          const SizedBox(height: 16),
+          GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: ResponsiveManager.gridCrossAxisCount,
-            crossAxisSpacing: ResponsiveManager.gridSpacing,
-            mainAxisSpacing: ResponsiveManager.gridSpacing,
-            childAspectRatio: 1.2,
-            children: [
-              _buildNutritionItem(context,
-                  label: "scan.calories".tr(),
-                  value: nutrition['calories'] ?? '0',
-                  color: context.primaryColor),
-              _buildNutritionItem(context,
-                  label: "scan.protein".tr(),
-                  value: nutrition['protein'] ?? '0g',
-                  color: const Color(0xFF4ECDC4)),
-              _buildNutritionItem(context,
-                  label: "scan.carbs".tr(),
-                  value: nutrition['carbs'] ?? '0g',
-                  color: const Color(0xFFFFD166)),
-              _buildNutritionItem(context,
-                  label: "scan.fat".tr(),
-                  value: nutrition['fat'] ?? '0g',
-                  color: const Color(0xFFFF6B6B)),
-              _buildNutritionItem(context,
-                  label: "Fiber",
-                  value: nutrition['fiber'] ?? '0g',
-                  color: const Color(0xFF9D4EDD)),
-              _buildNutritionItem(context,
-                  label: "Sugar",
-                  value: nutrition['sugar'] ?? '0g',
-                  color: const Color(0xFFF8961E)),
-            ],
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.2,
+            ),
+            itemCount: nutritionItems.length,
+            itemBuilder: (context, index) {
+              final item = nutritionItems[index];
+              return _buildNutritionItem(
+                label: item['label'] as String,
+                value: item['value'] as String,
+                color: item['color'] as Color,
+                ctx: context,
+              );
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNutritionItem(BuildContext context,
-      {required String label, required String value, required Color color}) {
+  Widget _buildNutritionItem({
+    required String label,
+    required String value,
+    required Color color,
+    required BuildContext ctx,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: context.dividerColor),
-        borderRadius: BorderRadius.circular(ResponsiveManager.radiusSmall),
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.1)),
       ),
-      padding: EdgeInsets.all(ResponsiveManager.spacingMedium),
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             value,
             style: TextStyle(
-              fontSize: ResponsiveManager.bodyLarge,
+              fontSize: 16,
               fontWeight: FontWeight.w800,
               color: color,
             ),
           ),
-          SizedBox(height: ResponsiveManager.spacingXSmall),
+          const SizedBox(height: 6),
           Text(
             label,
             style: TextStyle(
-              fontSize: ResponsiveManager.caption,
-              color: context.textColor,
+              fontSize: 12,
+              color: ctx.lightGrey,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -290,18 +316,5 @@ class FoodDetailScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  IconData _getFoodIcon(String foodName) {
-    final name = foodName.toLowerCase();
-    if (name.contains('apple')) return Icons.apple;
-    if (name.contains('pizza')) return Icons.local_pizza;
-    if (name.contains('burger')) return Icons.lunch_dining;
-    if (name.contains('salad')) return Icons.eco;
-    if (name.contains('chicken')) return Icons.kebab_dining;
-    if (name.contains('pasta')) return Icons.dinner_dining;
-    if (name.contains('peanut')) return Icons.egg_alt;
-    if (name.contains('lasagna')) return Icons.restaurant;
-    return Icons.fastfood;
   }
 }

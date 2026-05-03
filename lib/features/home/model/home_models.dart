@@ -1,5 +1,3 @@
-// lib/features/home/model/home_models.dart
-
 import 'dart:ui';
 
 class TodayProgressUiModel {
@@ -20,45 +18,48 @@ class RecentFoodUiModel {
   final String name;
   final String time;
   final int calories;
-  final String? imageAsset;
   final Color color;
   final String imagePath;
   final String weight;
   final String description;
   final Map<String, String> nutrition;
+  final DateTime date; // ✅ تاريخ الوجبة (اليوم الذي أضيفت فيه)
 
   const RecentFoodUiModel({
     required this.name,
     required this.time,
     required this.calories,
-    this.imageAsset,
-    this.color = const Color(0xFFFF6B6B),
-    this.imagePath = "assets/pictures/apple.png",
-    this.weight = "100 gr",
-    this.description = "",
-    this.nutrition = const {},
-  });
-}
-
-// بيانات إضافية للتفاصيل
-class FoodDetailData {
-  final String name;
-  final String time;
-  final String calories;
-  final Color color;
-  final String imagePath;
-  final String description;
-  final Map<String, String> nutrition;
-  final String weight;
-
-  const FoodDetailData({
-    required this.name,
-    required this.time,
-    required this.calories,
-    required this.color,
     required this.imagePath,
+    required this.color,
+    required this.weight,
     required this.description,
     required this.nutrition,
-    this.weight = "100 gr",
+    required this.date,
   });
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'time': time,
+        'calories': calories,
+        'imagePath': imagePath,
+        'colorValue': color.value,
+        'weight': weight,
+        'description': description,
+        'nutrition': nutrition,
+        'date': date.toIso8601String(),
+      };
+
+  factory RecentFoodUiModel.fromJson(Map<String, dynamic> json) {
+    return RecentFoodUiModel(
+      name: json['name'] as String,
+      time: json['time'] as String,
+      calories: json['calories'] as int,
+      imagePath: json['imagePath'] as String,
+      color: Color(json['colorValue'] as int),
+      weight: json['weight'] as String,
+      description: json['description'] as String,
+      nutrition: Map<String, String>.from(json['nutrition']),
+      date: DateTime.parse(json['date'] as String),
+    );
+  }
 }

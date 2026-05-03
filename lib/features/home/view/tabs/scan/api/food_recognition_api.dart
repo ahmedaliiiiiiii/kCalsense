@@ -24,9 +24,9 @@ class FoodRecognitionApi {
             ),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
+  // ✅ التعرف على الأكل من الصورة
   Future<FoodRecognitionResult> recognizeFood(File image) async {
     try {
-      // الحصول على التوكن
       final token = await _tokenStorage.getToken();
       print('Token: $token');
 
@@ -34,7 +34,6 @@ class FoodRecognitionApi {
         throw Exception('TOKEN_MISSING');
       }
 
-      // تجهيز الصورة للإرسال
       print('Preparing image: ${image.path}');
       final form = FormData.fromMap({
         'Image': await MultipartFile.fromFile(
@@ -43,7 +42,6 @@ class FoodRecognitionApi {
         ),
       });
 
-      // إرسال الطلب
       print('Sending request to API...');
       final response = await _dio.post(
         '/api/foodrecognition/recognize',
@@ -57,7 +55,6 @@ class FoodRecognitionApi {
       print('Response status: ${response.statusCode}');
       print('Response data: ${response.data}');
 
-      // معالجة الاستجابة
       if (response.data == null) {
         throw Exception('EMPTY_RESPONSE');
       }
@@ -84,4 +81,93 @@ class FoodRecognitionApi {
       throw Exception('NETWORK_ERROR: ${e.message ?? 'unknown'}');
     }
   }
+
+  // ✅ جلب الأكلات الحديثة (Recent Foods)
+  Future<List<FoodRecognitionResult>> getRecentRecognitions() async {
+    try {
+      final token = await _tokenStorage.getToken();
+
+      if (token == null || token.isEmpty) {
+        print('No token available for recent foods');
+        return [];
+      }
+
+      final response = await _dio.get(
+        '/api/foodrecognition/recent',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+
+      print('Recent foods response status: ${response.statusCode}');
+      print('Recent foods response data: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        if (data is List) {
+          return data
+              .map((item) => FoodRecognitionResult.fromJson(item))
+              .toList();
+        } else if (data is Map && data.containsKey('items')) {
+          // لو الـ API بيرجع Map بدل List
+          final items = data['items'];
+          if (items is List) {
+            return items
+                .map((item) => FoodRecognitionResult.fromJson(item))
+                .toList();
+          }
+        }
+      }
+
+      return [];
+    } on DioException catch (e) {
+      print('DioException in getRecentRecognitions: $e');
+      print('Response: ${e.response}');
+      return [];
+    } catch (e) {
+      print('Error getting recent foods: $e');
+      return [];
+    }
+  }
+
+  Future<void> saveMeal(
+      FoodRecognitionResult result, int quantityInGrams) async {
+    final token = await _tokenStorage.getToken();
+    if (token == null) throw Exception('TOKEN_MISSING');
+    final response = await _dio.post(
+      '/api/Meal/log',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+      data: {
+        'foodName': result.foodName, // ✅ استخدم اسم الطعام بدلاً من ID
+        'calories': result.calories,
+        'protein': result.protein,
+        'carbs': result.carbs,
+        'fat': result.fats,
+        'quantity': quantityInGrams,
+        'mealType': 'Snack',
+      },
+    );
+    // معالجة الاستجابة...
+  }
+
+// ❌ تم تعليق دالة saveMeal لأن FoodRecognitionResult لا يحتوي على foodId
+// إذا كانت هناك حاجة لحفظ الوجبات عبر API، قم بإضافة حقل foodId إلى FoodRecognitionResult وضبطه في fromJson
+/*
+  Future<void> saveMeal(FoodRecognitionResult result, int quantityInGrams) async {
+    final token = await _tokenStorage.getToken();
+    if (token == null) throw Exception('TOKEN_MISSING');
+    final response = await _dio.post(
+      '/api/Meal/log',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+      data: {
+        'foodName': result.foodName, // استخدام foodName بدلاً من foodId
+        'calories': result.calories,
+        'quantity': quantityInGrams,
+        'mealType': 'Snack',
+      },
+    );
+    // معالجة الاستجابة...
+  }
+  */
 }

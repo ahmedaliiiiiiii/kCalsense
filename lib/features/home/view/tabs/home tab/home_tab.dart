@@ -1,5 +1,3 @@
-// lib/features/home/view/home_tab.dart
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +12,7 @@ import '../../../../../core/widgets/quick_actions_grid.dart';
 import '../../../../../core/widgets/recent_foods_list.dart';
 import '../../../../../core/widgets/today_progress_card.dart';
 import '../../../../askai/askai_page.dart';
+import '../../../../notifications/NotificationHelper.dart';
 import '../../../../notifications/notifications_page.dart';
 import '../../../viewmodel/homeviewmodel.dart';
 import '../profile/view/profile_page.dart';
@@ -66,8 +65,46 @@ class _HomeBody extends StatelessWidget {
   }
 }
 
-class _HomeTabContent extends StatelessWidget {
+class _HomeTabContent extends StatefulWidget {
   const _HomeTabContent();
+
+  @override
+  State<_HomeTabContent> createState() => _HomeTabContentState();
+}
+
+class _HomeTabContentState extends State<_HomeTabContent> {
+  int _unreadCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnreadCount();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // تحديث العدد عند العودة للشاشة (في حالة العودة من صفحة الإشعارات)
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final count = await NotificationHelper.getUnreadCount();
+    if (mounted) {
+      setState(() {
+        _unreadCount = count;
+      });
+    }
+  }
+
+  Future<void> _openNotifications() async {
+    await Navigator.push(
+      context,
+      CustomPageTransitions.fastSlideTransition(const NotificationsPage()),
+    );
+    // بعد العودة من صفحة الإشعارات، يتم تعليم جميع الإشعارات كمقروءة، لذا نعيد تحميل العدد
+    await _loadUnreadCount();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +142,7 @@ class _HomeTabContent extends StatelessWidget {
               "home.greeting.track_nutrition".tr(),
               style: TextStyle(
                 fontSize: w * 0.035,
-                color: context.textSecondaryColor,
+                color: context.lightGrey,
               ),
             ),
           ],
@@ -119,34 +156,41 @@ class _HomeTabContent extends StatelessWidget {
                   size: w * 0.06,
                   color: context.iconColor,
                 ),
-                onPressed: () {
-                  context.pushWithTransition(
-                    const NotificationsPage(),
-                    type: TransitionType.fromBottom,
-                  );
-                },
+                onPressed: _openNotifications,
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
+              if (_unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      _unreadCount > 9 ? '9+' : '$_unreadCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
-          SizedBox(width: w * 0.02),
         ],
       ),
       body: SafeArea(
         child: Padding(
           padding:
-              EdgeInsets.symmetric(horizontal: w * 0.06, vertical: h * 0.015),
+              EdgeInsets.symmetric(horizontal: w * 0.05, vertical: h * 0.015),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
@@ -164,18 +208,14 @@ class _HomeTabContent extends StatelessWidget {
                 ),
                 SizedBox(height: h * 0.01),
                 QuickActionsGrid(
-                  onScan: () {
-                    vm.changeTab(1);
-                  },
+                  onScan: () => vm.changeTab(1),
                   onAskAi: () {
                     context.pushWithTransition(
                       const AskAiPage(),
                       type: TransitionType.ios,
                     );
                   },
-                  onStats: () {
-                    vm.changeTab(2);
-                  },
+                  onStats: () => vm.changeTab(2),
                   onManual: () {},
                 ),
                 SizedBox(height: h * 0.02),
@@ -192,9 +232,16 @@ class _HomeTabContent extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        context.pushWithTransition(
-                          const FoodsScreen(),
-                          type: TransitionType.ios,
+                        final homeVm =
+                            Provider.of<HomeViewModel>(context, listen: false);
+                        Navigator.push(
+                          context,
+                          CustomPageTransitions.fastSlideTransition(
+                            ChangeNotifierProvider.value(
+                              value: homeVm,
+                              child: const FoodsScreen(),
+                            ),
+                          ),
                         );
                       },
                       child: Text(
@@ -209,7 +256,7 @@ class _HomeTabContent extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: h * 0.01),
-                RecentFoodsList(items: vm.recentFoods),
+                RecentFoodsList(items: vm.recentFoodsForHome),
               ],
             ),
           ),

@@ -1,7 +1,9 @@
+// lib/features/home/view/tabs/scan/widgets/nalysis_results_sheet.dart
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
 
+import '../../../../../../core/utiles/responsive_manager.dart';
 import '../model/food_recognition_result.dart';
 
 class AnalysisResultsSheet extends StatelessWidget {
@@ -16,219 +18,247 @@ class AnalysisResultsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ResponsiveManager.init(context);
+    final theme = Theme.of(context);
+    final isSmallScreen = ResponsiveManager.isSmallScreen;
+
     final confidence = result.confidenceScore.clamp(0.0, 1.0);
-    String pct(double v) => '${(v * 100).toStringAsFixed(0)}%';
+    String percentage(double v) => '${(v * 100).toStringAsFixed(0)}%';
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.78,
-      padding: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+      height: ResponsiveManager.bottomSheetHeight,
+      padding: EdgeInsets.all(ResponsiveManager.spacingLarge),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(ResponsiveManager.bottomSheetRadius),
+        ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Handle
-          Center(
-            child: Container(
-              width: 56,
-              height: 5,
-              margin: const EdgeInsets.only(top: 6),
-              decoration: BoxDecoration(
-                color: context.dividerColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: context.primaryColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.analytics_outlined,
-                  color: context.primaryColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "scan.analysis_results".tr(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: context.textColor,
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin:
+                          EdgeInsets.only(top: ResponsiveManager.spacingXSmall),
+                      decoration: BoxDecoration(
+                        color: theme.dividerColor,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "scan.nutritional_breakdown".tr(),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: context.textSecondaryColor,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _ChipPill(
-                context: context,
-                icon: Icons.restaurant_menu,
-                text: result.foodName,
-              ),
-              _ChipPill(
-                context: context,
-                icon: Icons.category_outlined,
-                text: result.categoryName,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 18),
-
-          Text(
-            "scan.macros".tr(),
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: context.textColor,
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          Row(
-            children: [
-              Expanded(
-                child: _MacroCard(
-                  context: context,
-                  title: "scan.calories".tr(),
-                  value: result.calories.toStringAsFixed(0),
-                  unit: 'kcal',
-                  icon: Icons.local_fire_department_outlined,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _MacroCard(
-                  context: context,
-                  title: "scan.protein".tr(),
-                  value: result.protien.toStringAsFixed(1),
-                  unit: 'g',
-                  icon: Icons.fitness_center_outlined,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _MacroCard(
-                  context: context,
-                  title: "scan.carbs".tr(),
-                  value: result.carbs.toStringAsFixed(1),
-                  unit: 'g',
-                  icon: Icons.rice_bowl_outlined,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _MacroCard(
-                  context: context,
-                  title: "scan.fat".tr(),
-                  value: result.fats.toStringAsFixed(1),
-                  unit: 'g',
-                  icon: Icons.opacity_outlined,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 18),
-
-          Text(
-            "scan.confidence".tr(),
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: context.textColor,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.dividerColor),
-              color: context.surfaceColor,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(999),
-                    child: LinearProgressIndicator(
-                      value: confidence,
-                      minHeight: 10,
-                      backgroundColor: context.dividerColor,
-                      valueColor: AlwaysStoppedAnimation(context.primaryColor),
                     ),
                   ),
+
+                  SizedBox(height: ResponsiveManager.spacingMedium),
+
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        width: isSmallScreen ? 36 : 40,
+                        height: isSmallScreen ? 36 : 40,
+                        decoration: BoxDecoration(
+                          color: theme.primaryColor.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(
+                              ResponsiveManager.radiusMedium),
+                        ),
+                        child: Icon(
+                          Icons.analytics_outlined,
+                          color: theme.primaryColor,
+                          size: isSmallScreen ? 20 : 24,
+                        ),
+                      ),
+                      SizedBox(width: ResponsiveManager.spacingMedium),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "scan.analysis_results".tr(),
+                              style: TextStyle(
+                                fontSize: isSmallScreen
+                                    ? ResponsiveManager.heading4
+                                    : ResponsiveManager.heading3,
+                                fontWeight: FontWeight.w800,
+                                color: theme.textTheme.titleLarge?.color,
+                              ),
+                            ),
+                            SizedBox(height: ResponsiveManager.spacingXSmall),
+                            Text(
+                              "scan.nutritional_breakdown".tr(),
+                              style: TextStyle(
+                                fontSize: ResponsiveManager.caption,
+                                color: theme.textTheme.bodyMedium?.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: ResponsiveManager.spacingMedium),
+
+                  // Food Name & Category Chips
+                  Wrap(
+                    spacing: ResponsiveManager.spacingSmall,
+                    runSpacing: ResponsiveManager.spacingSmall,
+                    children: [
+                      _buildChip(Icons.restaurant_menu, result.foodName, theme),
+                      _buildChip(
+                          Icons.category_outlined, result.categoryName, theme),
+                    ],
+                  ),
+
+                  SizedBox(height: ResponsiveManager.spacingLarge),
+
+                  // Macros Title
+                  Text(
+                    "scan.macros".tr(),
+                    style: TextStyle(
+                      fontSize: ResponsiveManager.bodyLarge,
+                      fontWeight: FontWeight.w800,
+                      color: theme.textTheme.titleLarge?.color,
+                    ),
+                  ),
+
+                  SizedBox(height: ResponsiveManager.spacingSmall),
+
+                  // Macros Grid
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: ResponsiveManager.spacingSmall,
+                    mainAxisSpacing: ResponsiveManager.spacingSmall,
+                    childAspectRatio: 2.2,
+                    children: [
+                      _buildMacroCard(
+                        title: "scan.calories".tr(),
+                        value: result.calories.toStringAsFixed(0),
+                        unit: 'kcal',
+                        icon: Icons.local_fire_department_outlined,
+                        theme: theme,
+                        color: const Color(0xFFFF6B6B),
+                      ),
+                      _buildMacroCard(
+                        title: "scan.protein".tr(),
+                        value: result.protein.toStringAsFixed(1),
+                        unit: 'g',
+                        icon: Icons.fitness_center_outlined,
+                        theme: theme,
+                        color: const Color(0xFF4ECDC4),
+                      ),
+                      _buildMacroCard(
+                        title: "scan.carbs".tr(),
+                        value: result.carbs.toStringAsFixed(1),
+                        unit: 'g',
+                        icon: Icons.rice_bowl_outlined,
+                        theme: theme,
+                        color: const Color(0xFFFFD166),
+                      ),
+                      _buildMacroCard(
+                        title: "scan.fat".tr(),
+                        value: result.fats.toStringAsFixed(1),
+                        unit: 'g',
+                        icon: Icons.opacity_outlined,
+                        theme: theme,
+                        color: const Color(0xFF9D4EDD),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: ResponsiveManager.spacingLarge),
+
+                  // Confidence Title
+                  Text(
+                    "scan.confidence".tr(),
+                    style: TextStyle(
+                      fontSize: ResponsiveManager.bodyLarge,
+                      fontWeight: FontWeight.w800,
+                      color: theme.textTheme.titleLarge?.color,
+                    ),
+                  ),
+
+                  SizedBox(height: ResponsiveManager.spacingSmall),
+
+                  // Confidence Progress Bar
+                  Container(
+                    padding: EdgeInsets.all(ResponsiveManager.spacingSmall),
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(ResponsiveManager.radiusMedium),
+                      border: Border.all(color: theme.dividerColor),
+                      color: theme.cardTheme.color,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                                ResponsiveManager.radiusCircular),
+                            child: LinearProgressIndicator(
+                              value: confidence,
+                              minHeight: 8,
+                              backgroundColor: theme.dividerColor,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  theme.primaryColor),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: ResponsiveManager.spacingSmall),
+                        Text(
+                          percentage(confidence),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: theme.primaryColor,
+                            fontSize: ResponsiveManager.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: ResponsiveManager.spacingLarge),
+                ],
+              ),
+            ),
+          ),
+
+          // Done Button (Outside ScrollView)
+          Padding(
+            padding: EdgeInsets.only(
+              top: ResponsiveManager.spacingXSmall,
+              bottom: 0,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              height: ResponsiveManager.buttonHeight,
+              child: ElevatedButton(
+                onPressed: onDone,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(ResponsiveManager.buttonRadius),
+                  ),
+                  elevation: 0,
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  pct(confidence),
+                child: Text(
+                  "scan.done".tr(),
                   style: TextStyle(
+                    fontSize: ResponsiveManager.bodyLarge,
                     fontWeight: FontWeight.w900,
-                    color: context.primaryColor,
-                    fontSize: 16,
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          const Spacer(),
-
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onDone,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                "scan.done".tr(),
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
               ),
             ),
           ),
@@ -236,89 +266,66 @@ class AnalysisResultsSheet extends StatelessWidget {
       ),
     );
   }
-}
 
-class _ChipPill extends StatelessWidget {
-  final BuildContext context;
-  final IconData icon;
-  final String text;
-
-  const _ChipPill({
-    required this.context,
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildChip(IconData icon, String text, ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveManager.spacingSmall,
+        vertical: ResponsiveManager.spacingXSmall,
+      ),
       decoration: BoxDecoration(
-        color: context.primaryColor.withOpacity(0.10),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: context.primaryColor.withOpacity(0.18)),
+        color: theme.primaryColor.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(ResponsiveManager.radiusCircular),
+        border: Border.all(
+          color: theme.primaryColor.withOpacity(0.18),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: context.primaryColor),
-          const SizedBox(width: 8),
+          Icon(icon, size: 14, color: theme.primaryColor),
+          SizedBox(width: ResponsiveManager.spacingXSmall),
           Text(
             text,
             style: TextStyle(
-              color: context.textColor,
-              fontWeight: FontWeight.w700,
+              color: theme.textTheme.titleLarge?.color,
+              fontWeight: FontWeight.w600,
+              fontSize: ResponsiveManager.caption,
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class _MacroCard extends StatelessWidget {
-  final BuildContext context;
-  final String title;
-  final String value;
-  final String unit;
-  final IconData icon;
-
-  const _MacroCard({
-    required this.context,
-    required this.title,
-    required this.value,
-    required this.unit,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildMacroCard({
+    required String title,
+    required String value,
+    required String unit,
+    required IconData icon,
+    required ThemeData theme,
+    required Color color,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(ResponsiveManager.spacingSmall),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        color: context.surfaceColor,
-        border: Border.all(color: context.dividerColor),
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadow,
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          )
-        ],
+        borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
+        color: theme.cardTheme.color,
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
-              color: context.primaryColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(14),
+              color: color.withOpacity(0.1),
+              borderRadius:
+                  BorderRadius.circular(ResponsiveManager.radiusMedium),
             ),
-            child: Icon(icon, color: context.primaryColor, size: 22),
+            child: Icon(icon, color: color, size: 18),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: ResponsiveManager.spacingSmall),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,32 +333,38 @@ class _MacroCard extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    color: context.textSecondaryColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    color: theme.textTheme.bodySmall?.color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 2),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      value,
-                      style: TextStyle(
-                        color: context.textColor,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 18,
+                    Flexible(
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          color: theme.textTheme.titleLarge?.color,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 2),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
                         unit,
                         style: TextStyle(
-                          color: context.textSecondaryColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                          color: theme.textTheme.bodyMedium?.color,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
                         ),
                       ),
                     ),

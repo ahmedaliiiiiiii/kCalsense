@@ -19,8 +19,8 @@ import '../../../core/utiles/responsive_manager.dart';
 import '../../home/view/tabs/home tab/home_tab.dart';
 import 'cubit/authcubit_cubit.dart';
 import 'cubit/authcubit_state.dart';
-import 'forget_password_page.dart';
 import 'register_page.dart';
+import 'reset password/forget_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = "/login";
