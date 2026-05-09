@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../utiles/color_manager.dart';
+import '../utils/color_manager.dart';
 
 class AppTheme {
   static ThemeData lightTheme = ThemeData(
@@ -36,7 +36,7 @@ class AppTheme {
     cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 2,
-      shadowColor: Colors.black.withValues(alpha: 0.05),
+      shadowColor: Colors.black.withOpacity(0.05),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -99,7 +99,7 @@ class AppTheme {
     cardTheme: CardThemeData(
       color: const Color(0xFF1A1A1A),
       elevation: 4,
-      shadowColor: Colors.black.withValues(alpha: 0.5),
+      shadowColor: Colors.black.withOpacity(0.5),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),

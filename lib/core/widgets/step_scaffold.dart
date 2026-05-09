@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
-import '../utiles/color_manager.dart';
-import '../utiles/responsive_manager.dart';
+import '../utils/color_manager.dart';
+import '../utils/responsive_manager.dart';
 
 class StepScaffold extends StatelessWidget {
   final String title;

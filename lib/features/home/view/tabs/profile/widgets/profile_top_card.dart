@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
 
-import '../../../../../../core/utiles/responsive_manager.dart';
+import '../../../../../../core/utils/responsive_manager.dart';
 import '../viewmodel/profile_view_model.dart';
 
 class ProfileTopCard extends StatelessWidget {
@@ -53,7 +53,7 @@ class ProfileTopCard extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: context.primaryColor.withValues(alpha: 0.3),
+                  color: context.primaryColor.withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -70,7 +70,7 @@ class ProfileTopCard extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: context.primaryColor.withValues(alpha: 0.2),
+                          color: context.primaryColor.withOpacity(0.2),
                           child: Icon(
                             Icons.person,
                             color: context.primaryColor,
@@ -119,7 +119,7 @@ class _EditButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: context.primaryColor.withValues(alpha: 0.15),
+      color: context.primaryColor.withOpacity(0.15),
       borderRadius: BorderRadius.circular(ResponsiveManager.radiusCircular),
       child: InkWell(
         borderRadius: BorderRadius.circular(ResponsiveManager.radiusCircular),

@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
 import 'package:kcalsense/features/notifications/NotificationHelper.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -23,10 +23,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Future<void> _loadNotificationsAndMarkRead() async {
     setState(() => _isLoading = true);
 
-    // تعليم جميع الإشعارات كمقروءة
+    // Mark all notifications as read
     await NotificationHelper.markAllAsRead();
 
-    // تحميل الإشعارات
+    // Load notifications
     final notifications = await NotificationHelper.getNotifications();
 
     setState(() {
@@ -44,11 +44,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final now = DateTime.now();
     final diff = now.difference(timestamp);
 
-    if (diff.inSeconds < 60) return "الآن";
-    if (diff.inMinutes < 60) return "${diff.inMinutes} دقيقة مضت";
-    if (diff.inHours < 24) return "${diff.inHours} ساعة مضت";
-    if (diff.inDays < 7) return "${diff.inDays} يوم مضت";
-    if (diff.inDays < 30) return "${(diff.inDays / 7).floor()} أسبوع مضت";
+    if (diff.inSeconds < 60) return "Just now";
+    if (diff.inMinutes < 60) return "${diff.inMinutes}m ago";
+    if (diff.inHours < 24) return "${diff.inHours}h ago";
+    if (diff.inDays < 7) return "${diff.inDays}d ago";
+    if (diff.inDays < 30) return "${(diff.inDays / 7).floor()}w ago";
     return DateFormat('dd/MM/yyyy').format(timestamp);
   }
 
@@ -88,7 +88,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: context.primaryColor))
           : _notifications.isEmpty
               ? Center(
                   child: Column(
@@ -96,7 +96,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     children: [
                       Icon(Icons.notifications_none,
                           size: 80, color: context.lightGrey),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
                         "notifications.no_notifications".tr(),
                         style:
@@ -113,7 +113,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     final notification = _notifications[index];
                     final timestamp = DateTime.parse(notification['timestamp']);
                     final timeAgo = _getTimeAgo(timestamp);
-                    // جميع الإشعارات مقروءة الآن، لذا isNew = false
+                    // All notifications are now marked as read
                     return _buildNotificationItem(
                       context,
                       title: notification['title'],
@@ -134,7 +134,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     final w = MediaQuery.of(context).size.width;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(w * 0.03),
       decoration: BoxDecoration(
         color: context.surfaceColor,
@@ -169,7 +169,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     color: context.textColor,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   message,
                   style: TextStyle(
@@ -177,7 +177,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     color: context.textSecondaryColor,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   time,
                   style: TextStyle(

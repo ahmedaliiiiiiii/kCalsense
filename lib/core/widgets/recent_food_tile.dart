@@ -1,8 +1,8 @@
-// import 'package:flutter/material.dart';
+﻿// import 'package:flutter/material.dart';
 //
 // import '../../features/home/model/home_models.dart';
-// import '../utiles/color_manager.dart';
-// import '../utiles/responsive_manager.dart';
+// import '../utils/color_manager.dart';
+// import '../utils/responsive_manager.dart';
 //
 // class RecentFoodTile extends StatelessWidget {
 //   final RecentFoodUiModel item;

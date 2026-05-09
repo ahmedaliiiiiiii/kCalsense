@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../../core/utiles/color_manager.dart';
+import '../../../../../../core/utils/color_manager.dart';
 
 class ScanPreview extends StatelessWidget {
   final File? image;
@@ -23,7 +23,7 @@ class ScanPreview extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: ColorManager.primaryColor.withValues(alpha: 0.1),
+          color: ColorManager.primaryColor.withOpacity(0.1),
           shape: BoxShape.circle,
         ),
         child: const Icon(

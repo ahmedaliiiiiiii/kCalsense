@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
 
-import '../../../../../../core/utiles/responsive_manager.dart';
+import '../../../../../../core/utils/responsive_manager.dart';
 
 class HelpCenterPage extends StatelessWidget {
   static const String routeName = "/help";
@@ -99,8 +99,8 @@ class HelpCenterPage extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    context.primaryColor.withValues(alpha: 0.1),
-                    context.primaryColor.withValues(alpha: 0.05),
+                    context.primaryColor.withOpacity(0.1),
+                    context.primaryColor.withOpacity(0.05),
                   ],
                 ),
                 borderRadius:
@@ -252,9 +252,9 @@ class HelpCenterPage extends StatelessWidget {
           vertical: ResponsiveManager.spacingMedium,
         ),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(ResponsiveManager.radiusMedium),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Column(
           children: [

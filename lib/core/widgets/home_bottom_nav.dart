@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../features/askai/askai_page.dart';
 import '../navigation/page_transitions.dart';
-import '../utiles/color_manager.dart';
+import '../utils/color_manager.dart';
 
 class HomeBottomNav extends StatelessWidget {
   final int selectedIndex;

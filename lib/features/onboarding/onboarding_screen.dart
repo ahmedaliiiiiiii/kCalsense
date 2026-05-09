@@ -1,11 +1,11 @@
-// lib/features/onboarding/onboarding_screen.dart
+﻿// lib/features/onboarding/onboarding_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // ✅ import المطلوب
 
-import '../../core/navigation/page_transitions.dart';
-import '../../core/utiles/color_manager.dart';
-import '../../core/utiles/responsive_manager.dart';
-import '../../features/auth/presention/login_page.dart';
+import '../../core/router/app_router.dart'; // ✅ لإستخدام AppRouter.login
+import '../../core/utils/color_manager.dart';
+import '../../core/utils/responsive_manager.dart';
 import '../onboarding/widgets/onboarding_indicators.dart';
 import '../onboarding/widgets/onboarding_page.dart';
 import '../onboarding/widgets/onboarding_primary_button.dart';
@@ -13,7 +13,7 @@ import '../onboarding/widgets/onboarding_top_bar.dart';
 import 'data/onboarding_data.dart';
 
 class OnBoardingScreen extends StatefulWidget {
-  static const String routeName = "/OnBoarding";
+  static const String routeName = "/onboarding";
   const OnBoardingScreen({super.key});
 
   @override
@@ -99,14 +99,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen>
     _navigateToLogin();
   }
 
-  void _navigateToLogin() async {
-    // تم مشاهدة Onboarding
+  void _navigateToLogin() {
     if (!mounted) return;
-
-    context.pushWithTransition(
-      const LoginPage(),
-      type: TransitionType.zoom,
-    );
+    context.go(AppRouter.login);
   }
 
   @override

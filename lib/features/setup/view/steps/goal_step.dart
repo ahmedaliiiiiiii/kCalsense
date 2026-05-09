@@ -1,11 +1,11 @@
-// lib/features/setup/view/steps/goal_step.dart
+﻿// lib/features/setup/view/steps/goal_step.dart
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/utiles/color_manager.dart';
-import '../../../../core/utiles/responsive_manager.dart';
+import '../../../../core/utils/color_manager.dart';
+import '../../../../core/utils/responsive_manager.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/step_scaffold.dart';
 import '../../model/setup_models.dart';

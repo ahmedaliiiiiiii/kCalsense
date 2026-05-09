@@ -1,9 +1,9 @@
-// lib/features/home/tabs/scan/widgets/scan_texts.dart
+﻿// lib/features/home/tabs/scan/widgets/scan_texts.dart
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../../core/utiles/color_manager.dart';
+import '../../../../../../core/utils/color_manager.dart';
 
 class ScanTexts extends StatelessWidget {
   final bool hasImage;

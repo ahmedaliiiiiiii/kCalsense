@@ -7,11 +7,11 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../../../core/utiles/responsive_manager.dart';
+import '../../../../../../core/utils/responsive_manager.dart';
 import '../../../../../setup/model/setup_models.dart';
 import '../viewmodel/edit_profile_view_model.dart';
 import '../viewmodel/profile_api_models.dart';
@@ -149,7 +149,7 @@ class _EditProfileBodyState extends State<_EditProfileBody> {
                 width: 40.w,
                 height: 4.h,
                 decoration: BoxDecoration(
-                  color: context.lightGrey.withValues(alpha: 0.3),
+                  color: context.lightGrey.withOpacity(0.3),
                   borderRadius:
                       BorderRadius.circular(ResponsiveManager.radiusCircular),
                 ),
@@ -210,7 +210,7 @@ class _EditProfileBodyState extends State<_EditProfileBody> {
       child: Container(
         padding: EdgeInsets.all(ResponsiveManager.spacingLarge),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
         ),
         child: Column(
@@ -293,7 +293,7 @@ class _EditProfileBodyState extends State<_EditProfileBody> {
                               boxShadow: [
                                 BoxShadow(
                                   color: context.primaryColor
-                                      .withValues(alpha: 0.2),
+                                      .withOpacity(0.2),
                                   blurRadius: 12.h,
                                   offset: const Offset(0, 4),
                                 ),
@@ -577,9 +577,9 @@ class _EditProfileBodyState extends State<_EditProfileBody> {
     return Container(
       padding: EdgeInsets.all(ResponsiveManager.spacingMedium),
       decoration: BoxDecoration(
-        color: context.errorColor.withValues(alpha: 0.1),
+        color: context.errorColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(ResponsiveManager.radiusSmall),
-        border: Border.all(color: context.errorColor.withValues(alpha: 0.3)),
+        border: Border.all(color: context.errorColor.withOpacity(0.3)),
       ),
       child: Row(
         children: [

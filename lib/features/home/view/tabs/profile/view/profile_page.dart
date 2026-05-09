@@ -1,26 +1,28 @@
-// lib/features/home/tabs/profile/view/profile_page.dart
+// lib/features/home/view/tabs/profile/view/profile_page.dart
+
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/di/service_locator.dart';
+import 'package:kcalsense/core/navigation/page_transitions.dart';
+import 'package:kcalsense/core/router/app_router.dart';
+import 'package:kcalsense/core/storage/token_storage.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
+import 'package:kcalsense/core/utils/responsive_manager.dart';
+import 'package:kcalsense/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:kcalsense/features/home/view/tabs/profile/viewmodel/profile_view_model.dart';
+import 'package:kcalsense/features/home/view/tabs/profile/widgets/profile_goal_card.dart';
+import 'package:kcalsense/features/home/view/tabs/profile/widgets/profile_info.dart';
+import 'package:kcalsense/features/home/view/tabs/profile/widgets/profile_section_title.dart';
+import 'package:kcalsense/features/home/view/tabs/profile/widgets/profile_settings_card.dart';
+import 'package:kcalsense/features/home/view/tabs/profile/widgets/profile_top_card.dart';
+import 'package:kcalsense/features/notifications/notifications_page.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../../../core/diauth/service_locator.dart';
-import '../../../../../../core/navigation/page_transitions.dart';
-import '../../../../../../core/storge/token_storage.dart';
-import '../../../../../../core/utiles/responsive_manager.dart'
-    show ResponsiveManager;
-import '../../../../../auth/presention/login_page.dart';
-import '../../../../../notifications/notifications_page.dart';
-import '../viewmodel/profile_view_model.dart';
-import '../widgets/profile_goal_card.dart';
-import '../widgets/profile_info.dart';
-import '../widgets/profile_section_title.dart';
-import '../widgets/profile_settings_card.dart';
-import '../widgets/profile_top_card.dart';
 import 'edit_profile_screen.dart';
 import 'help_center_page.dart';
 import 'privacy_policy_page.dart';
@@ -90,15 +92,27 @@ class _ProfileBodyState extends State<_ProfileBody> {
     }
   }
 
-  void _signOut(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-      (route) => false,
-    );
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      final vm = context.read<ProfileViewModel>();
+      await vm.signOut();
+
+      if (context.mounted) {
+        context.read<AuthCubit>().logout();
+        AppRouter.router.go(AppRouter.login);
+      }
+    } catch (e) {
+      debugPrint("Sign out error: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing out: $e')),
+        );
+      }
+    }
   }
 
-  void _showSignOutDialog(BuildContext context) {
-    showDialog(
+  void _showSignOutDialog(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -119,7 +133,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context, false),
               child: Text(
                 'profile.cancel'.tr(),
                 style: TextStyle(
@@ -129,10 +143,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _signOut(context);
-              },
+              onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
@@ -147,6 +158,10 @@ class _ProfileBodyState extends State<_ProfileBody> {
         );
       },
     );
+
+    if (confirmed == true && mounted) {
+      _signOut(context);
+    }
   }
 
   @override
@@ -203,11 +218,11 @@ class _ProfileBodyState extends State<_ProfileBody> {
                         margin: EdgeInsets.only(
                             bottom: ResponsiveManager.spacingLarge),
                         decoration: BoxDecoration(
-                          color: context.errorColor.withValues(alpha: 0.1),
+                          color: context.errorColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(
                               ResponsiveManager.radiusSmall),
                           border: Border.all(
-                              color: context.errorColor.withValues(alpha: 0.3)),
+                              color: context.errorColor.withOpacity(0.3)),
                         ),
                         child: Row(
                           children: [

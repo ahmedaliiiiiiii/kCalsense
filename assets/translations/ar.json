@@ -26,7 +26,10 @@
     "calories": "سعرة",
     "goal": "الهدف",
     "Search_here": "ابحث هنا",
-    "Smart_Food_Suggestions": "اقتراحات الطعام الذكية"
+    "Smart_Food_Suggestions": "اقتراحات الطعام الذكية",
+    "No_recent_foods_yet": "ليس هناك طعام",
+    "scan_meal": "اضف طعامك ليظهر هنا",
+    "No_results": "لا نتائج"
   },
   "scan": {
     "title": "امسح طعامك",
@@ -51,19 +54,19 @@
   "stats": {
     "title": "التحليلات",
     "subtitle": "تتبع رحلتك الغذائية",
-    "calories": "السعرات",
-    "macros": "المغذيات",
-    "progress": "التقدم",
-    "this_week": "هذا الأسبوع",
-    "this_month": "هذا الشهر",
-    "this_year": "هذه السنة",
+    "calories_tab": "السعرات",
+    "macros_tab": "المغذيات",
+    "progress_tab": "التقدم",
+    "period_week": "هذا الأسبوع",
+    "period_month": "هذا الشهر",
+    "period_year": "هذه السنة",
     "total_calories": "إجمالي السعرات",
     "daily_average": "المتوسط اليومي",
-    "total_days": "إجمالي الأيام",
+    "active_days": "الأيام النشطة",
     "current_streak": "السلسلة الحالية",
     "daily_calories": "السعرات اليومية",
-    "your_calorie_intake": "مدخولك من السعرات عبر الوقت",
-    "macronutrient_distribution": "توزيع المغذيات الكبرى",
+    "calorie_intake_over_time": "مدخولك من السعرات عبر الوقت",
+    "macronutrient_distribution": "توزيع المغذيات الكبرى (المتوسط اليومي)",
     "total": "الإجمالي",
     "goal_progress": "التقدم نحو الهدف",
     "track_progress": "تتبع تقدمك نحو أهدافك",
@@ -78,7 +81,12 @@
     "protein_king": "ملك البروتين",
     "energy_boost": "دفعة طاقة",
     "healthy_eater": "آكل صحي",
-    "early_bird": "مبكر"
+    "early_bird": "مبكر",
+    "no_data": "لا توجد بيانات بعد",
+    "start_logging": "ابدأ في تسجيل وجباتك لرؤية الإحصائيات",
+    "no_macro_data": "لا توجد بيانات مغذيات متاحة",
+    "no_calorie_data": "لا توجد بيانات سعرات لهذه الفترة",
+    "loading_stats": "جاري تحميل الإحصائيات..."
   },
   "profile": {
     "theme_dialog": {
@@ -137,6 +145,7 @@
   },
   "notifications": {
     "title": "الإشعارات",
+    "no_notifications": "لا توجد إشعارات",
     "meal_logged": "تم تسجيل الوجبة",
     "meal_logged_message": "لقد سجلت",
     "goal_achieved": "تم تحقيق الهدف",
@@ -149,6 +158,13 @@
     "hour_ago": "ساعة مضت",
     "hours_ago": "ساعات مضت",
     "yesterday": "أمس"
+  },
+  "time": {
+    "now": "الآن",
+    "minutes_ago": "{0} دقيقة مضت",
+    "hours_ago": "{0} ساعة مضت",
+    "days_ago": "{0} يوم مضت",
+    "weeks_ago": "{0} أسبوع مضت"
   },
   "help_center": {
     "title": "مركز المساعدة",

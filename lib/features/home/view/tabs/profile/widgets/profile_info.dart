@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
 
-import '../../../../../../core/utiles/responsive_manager.dart';
+import '../../../../../../core/utils/responsive_manager.dart';
 import '../viewmodel/profile_view_model.dart';
 
 class ProfileBasicInfoGrid extends StatelessWidget {
@@ -94,7 +94,7 @@ class _InfoTile extends StatelessWidget {
         vertical: ResponsiveManager.spacingMedium,
       ),
       decoration: BoxDecoration(
-        color: context.primaryColor.withValues(alpha: 0.1),
+        color: context.primaryColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
       ),
       child: Column(

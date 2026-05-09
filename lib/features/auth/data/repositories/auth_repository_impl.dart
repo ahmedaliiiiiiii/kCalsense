@@ -3,8 +3,8 @@ import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_endpoints.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../models/auth_response.dart';
-import 'auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final ApiClient api;

@@ -1,9 +1,9 @@
-// lib/features/home/tabs/profile/widgets/profile_section_title.dart
+﻿// lib/features/home/tabs/profile/widgets/profile_section_title.dart
 
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
 
-import '../../../../../../core/utiles/responsive_manager.dart';
+import '../../../../../../core/utils/responsive_manager.dart';
 
 class ProfileSectionTitle extends StatelessWidget {
   final IconData icon;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../core/utiles/color_manager.dart';
+import '../../../../../core/utils/color_manager.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String userName;

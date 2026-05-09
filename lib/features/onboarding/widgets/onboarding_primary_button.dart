@@ -1,10 +1,10 @@
-// lib/features/onboarding/widgets/onboarding_primary_button.dart
+﻿// lib/features/onboarding/widgets/onboarding_primary_button.dart
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/utiles/color_manager.dart';
-import '../../../core/utiles/responsive_manager.dart';
+import '../../../core/utils/color_manager.dart';
+import '../../../core/utils/responsive_manager.dart';
 
 class OnboardingPrimaryButton extends StatefulWidget {
   final bool isLast;

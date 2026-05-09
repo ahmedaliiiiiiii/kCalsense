@@ -2,13 +2,13 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:kcalsense/core/utiles/color_manager.dart';
+import 'package:kcalsense/core/utils/color_manager.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../../../core/storge/shared_preferences_helper.dart';
+import '../../../../../../core/di/service_locator.dart';
+import '../../../../../../core/storage/app_prefs.dart';
 import '../../../../../../core/theme/theme_provider.dart';
-import '../../../../../../core/utiles/responsive_manager.dart';
-import '../../../../../auth/presention/login_page.dart';
+import '../../../../../../core/utils/responsive_manager.dart';
 
 class ProfileSettingsCard extends StatelessWidget {
   final VoidCallback onNotifications;
@@ -110,6 +110,7 @@ class ProfileSettingsCard extends StatelessWidget {
 
   Future<void> _showLanguageDialog(BuildContext context) async {
     final currentLocale = context.locale;
+    final appPrefs = sl<AppPrefs>();
 
     showDialog(
       context: context,
@@ -133,7 +134,7 @@ class ProfileSettingsCard extends StatelessWidget {
                 isSelected: currentLocale.languageCode == 'en',
                 onTap: () async {
                   await context.setLocale(const Locale('en'));
-                  await SharedPreferencesHelper.saveLanguage('en');
+                  await appPrefs.saveLanguage('en');
                   if (context.mounted) Navigator.pop(context);
                 },
               ),
@@ -145,7 +146,7 @@ class ProfileSettingsCard extends StatelessWidget {
                 isSelected: currentLocale.languageCode == 'ar',
                 onTap: () async {
                   await context.setLocale(const Locale('ar'));
-                  await SharedPreferencesHelper.saveLanguage('ar');
+                  await appPrefs.saveLanguage('ar');
                   if (context.mounted) Navigator.pop(context);
                 },
               ),
@@ -295,7 +296,7 @@ class ProfileSettingsCard extends StatelessWidget {
         size: ResponsiveManager.iconSmall,
         color: context.lightGrey,
       ),
-      onTap: () => _showSignOutDialog(context),
+      onTap: onSignOut,
     );
   }
 
@@ -310,6 +311,7 @@ class ProfileSettingsCard extends StatelessWidget {
 
   Future<void> _showThemeDialog(
       BuildContext context, ThemeProvider themeProvider) async {
+    final appPrefs = sl<AppPrefs>();
     final result = await showDialog<AppThemeMode>(
       context: context,
       builder: (BuildContext context) {
@@ -321,7 +323,7 @@ class ProfileSettingsCard extends StatelessWidget {
           ),
           child: Container(
             width: double.infinity,
-            constraints: BoxConstraints(
+            constraints: const BoxConstraints(
               maxWidth: 400,
             ),
             decoration: BoxDecoration(
@@ -484,7 +486,7 @@ class ProfileSettingsCard extends StatelessWidget {
       } else if (result == AppThemeMode.dark) {
         themeValue = 'dark';
       }
-      await SharedPreferencesHelper.saveThemeMode(themeValue);
+      await appPrefs.saveThemeMode(themeValue);
     }
   }
 
@@ -604,60 +606,4 @@ class ProfileSettingsCard extends StatelessWidget {
     );
   }
 
-  Future<void> _showSignOutDialog(BuildContext context) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: context.surfaceColor,
-          title: Text(
-            "profile.sign_out".tr(),
-            style: TextStyle(
-              color: context.textColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          content: Text(
-            "profile.sign_out_confirmation".tr(),
-            style: TextStyle(color: context.textSecondaryColor),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveManager.radiusLarge),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                "profile.cancel".tr(),
-                style: TextStyle(
-                  color: context.lightGrey,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                await SharedPreferencesHelper.clearAll();
-                if (!context.mounted) return;
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (route) => false,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(ResponsiveManager.radiusSmall),
-                ),
-              ),
-              child: Text("profile.sign_out".tr()),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

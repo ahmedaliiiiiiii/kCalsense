@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
-import '../utiles/color_manager.dart';
+import '../utils/color_manager.dart';
 
 class AuthBackground extends StatelessWidget {
   final Widget child;

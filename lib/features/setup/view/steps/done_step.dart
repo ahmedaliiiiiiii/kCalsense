@@ -4,14 +4,14 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../core/navigation/page_transitions.dart';
-import '../../../../core/storge/shared_preferences_helper.dart';
-import '../../../../core/utiles/color_manager.dart';
-import '../../../../core/utiles/responsive_manager.dart';
+import '../../../../core/di/service_locator.dart';
+import '../../../../core/storage/app_prefs.dart';
+import '../../../../core/utils/color_manager.dart';
+import '../../../../core/utils/responsive_manager.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/step_scaffold.dart';
-import '../../../home/view/tabs/home tab/home_tab.dart';
 
 class DoneStep extends StatefulWidget {
   const DoneStep({super.key});
@@ -69,15 +69,14 @@ class _DoneStepState extends State<DoneStep>
   }
 
   Future<void> _completeSetup() async {
-    // ✅ تم إكمال الـ Setup
-    await SharedPreferencesHelper.setSetupCompleted(true);
+    // استخدام AppPrefs بدلاً من SharedPreferencesHelper لضمان توافق التنقل
+    final appPrefs = sl<AppPrefs>();
+    await appPrefs.setSetupCompleted(true);
 
     if (!mounted) return;
 
-    Navigator.pushReplacement(
-      context,
-      CustomPageTransitions.fastSlideTransition(const HomePage()),
-    );
+    // الانتقال للرئيسية باستخدام GoRouter
+    context.go('/home');
   }
 
   @override

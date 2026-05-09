@@ -26,7 +26,10 @@
     "calories": "calories",
     "goal": "goal",
     "Search_here": "Search here",
-    "Smart_Food_Suggestions": "Smart Food Suggestions"
+    "Smart_Food_Suggestions": "Smart Food Suggestions",
+    "No_recent_foods_yet": "No recent foods yet",
+    "scan_meal": "Scan a meal to see it here",
+    "No_results": "No results found"
   },
   "scan": {
     "title": "Scan Your Food",
@@ -51,19 +54,19 @@
   "stats": {
     "title": "Analytics",
     "subtitle": "Track your nutrition journey",
-    "calories": "Calories",
-    "macros": "Macros",
-    "progress": "Progress",
-    "this_week": "This Week",
-    "this_month": "This Month",
-    "this_year": "This Year",
+    "calories_tab": "Calories",
+    "macros_tab": "Macros",
+    "progress_tab": "Progress",
+    "period_week": "This Week",
+    "period_month": "This Month",
+    "period_year": "This Year",
     "total_calories": "Total Calories",
     "daily_average": "Daily Average",
-    "total_days": "Total Days",
+    "active_days": "Active Days",
     "current_streak": "Current Streak",
     "daily_calories": "Daily Calories",
-    "your_calorie_intake": "Your calorie intake over time",
-    "macronutrient_distribution": "Macronutrient Distribution",
+    "calorie_intake_over_time": "Your calorie intake over time",
+    "macronutrient_distribution": "Macronutrient Distribution (Avg/day)",
     "total": "Total",
     "goal_progress": "Goal Progress",
     "track_progress": "Track your progress towards your goals",
@@ -78,7 +81,12 @@
     "protein_king": "Protein King",
     "energy_boost": "Energy Boost",
     "healthy_eater": "Healthy Eater",
-    "early_bird": "Early Bird"
+    "early_bird": "Early Bird",
+    "no_data": "No data yet",
+    "start_logging": "Start logging your meals to see statistics",
+    "no_macro_data": "No macro data available",
+    "no_calorie_data": "No calorie data for this period",
+    "loading_stats": "Loading statistics..."
   },
   "profile": {
     "theme_dialog": {
@@ -140,6 +148,7 @@
   },
   "notifications": {
     "title": "Notifications",
+    "no_notifications": "No notifications",
     "meal_logged": "Meal Logged",
     "meal_logged_message": "You logged",
     "goal_achieved": "Goal Achieved",
@@ -152,6 +161,13 @@
     "hour_ago": "hour ago",
     "hours_ago": "hours ago",
     "yesterday": "Yesterday"
+  },
+  "time": {
+    "now": "Just now",
+    "minutes_ago": "{0} minutes ago",
+    "hours_ago": "{0} hours ago",
+    "days_ago": "{0} days ago",
+    "weeks_ago": "{0} weeks ago"
   },
   "help_center": {
     "title": "Help Center",

@@ -1,23 +1,21 @@
-// lib/features/home/view/tabs/scan/model/food_recognition_result.dart
+// ignore_for_file: unused_element, unnecessary_this
+
+import 'dart:developer';
 
 class FoodRecognitionResult {
   final String foodName;
-  final double calories;
-  final double carbs;
-  final double protein;
-  final double fats;
-  final String categoryName;
-  final double confidenceScore;
+  final double totalcalories;
+  final double totalcarbs;
+  final double totalprotein;
+  final double totalfats;
   final String imagePath;
 
   const FoodRecognitionResult({
     required this.foodName,
-    required this.calories,
-    required this.carbs,
-    required this.protein,
-    required this.fats,
-    required this.categoryName,
-    required this.confidenceScore,
+    required this.totalcalories,
+    required this.totalcarbs,
+    required this.totalprotein,
+    required this.totalfats,
     this.imagePath = '',
   });
 
@@ -27,55 +25,85 @@ class FoodRecognitionResult {
     double? carbs,
     double? protein,
     double? fats,
-    String? categoryName,
-    double? confidenceScore,
     String? imagePath,
   }) {
     return FoodRecognitionResult(
       foodName: foodName ?? this.foodName,
-      calories: calories ?? this.calories,
-      carbs: carbs ?? this.carbs,
-      protein: protein ?? this.protein,
-      fats: fats ?? this.fats,
-      categoryName: categoryName ?? this.categoryName,
-      confidenceScore: confidenceScore ?? this.confidenceScore,
+      totalcalories: calories ?? this.totalcalories,
+      totalcarbs: carbs ?? this.totalcarbs,
+      totalprotein: protein ?? this.totalprotein,
+      totalfats: fats ?? this.totalfats,
       imagePath: imagePath ?? this.imagePath,
     );
   }
 
-  static double _toDouble(dynamic v) {
-    if (v == null) return 0.0;
-    if (v is num) return v.toDouble();
-    return double.tryParse(v.toString()) ?? 0.0;
+  /// محاولة استخراج قيمة عددية من key مع محاولات متعددة
+  static double _extractDouble(Map<String, dynamic> json, List<String> keys) {
+    for (var key in keys) {
+      if (json.containsKey(key)) {
+        var value = json[key];
+        if (value != null) {
+          if (value is num) return value.toDouble();
+          if (value is String) {
+            var parsed = double.tryParse(value);
+            if (parsed != null) return parsed;
+          }
+        }
+      }
+    }
+    return 0.0;
   }
 
-  static String _toStringSafe(dynamic v) => (v ?? '').toString();
-
-  static dynamic _pick(Map<String, dynamic> json, List<String> keys) {
-    for (final k in keys) {
-      if (json.containsKey(k)) return json[k];
+  static String _extractString(Map<String, dynamic> json, List<String> keys) {
+    for (var key in keys) {
+      if (json.containsKey(key) && json[key] != null) {
+        return json[key].toString();
+      }
     }
-    return null;
+    return '';
   }
 
   factory FoodRecognitionResult.fromJson(Map<String, dynamic> json) {
-    double confidence =
-        _toDouble(_pick(json, ['confidenceScore', 'Confidence_Score']));
+    log("🔍 Raw JSON: $json");
 
-    // ✅ لو الـ API مجابش confidence، استخدم قيمة وهمية
-    if (confidence == 0) {
-      confidence = 0.85;
+    // دالة مساعدة لتجربة عدة مفاتيح
+    double getNumber(List<String> keys) {
+      for (var key in keys) {
+        if (json.containsKey(key)) {
+          var val = json[key];
+          if (val is num) return val.toDouble();
+          if (val is String) return double.tryParse(val) ?? 0.0;
+        }
+      }
+      return 0.0;
     }
 
+    String getString(List<String> keys) {
+      for (var key in keys) {
+        if (json.containsKey(key) && json[key] != null) {
+          return json[key].toString();
+        }
+      }
+      return '';
+    }
+
+    final name = getString(['foodName', 'FoodName', 'name', 'title']);
+    final calories =
+        getNumber(['calories', 'Calories', 'totalCalories', 'kcal', 'energy']);
+    final protein =
+        getNumber(['protein', 'Protein', 'totalProtein', 'protien']);
+    final carbs =
+        getNumber(['carbs', 'Carbs', 'totalCarbs', 'carbohydrates', 'carbon']);
+    final fats = getNumber(['fats', 'Fats', 'totalFats', 'fat', 'lipids']);
+
+    log("✅ Extracted: name=$name, cal=$calories, protein=$protein, carbs=$carbs, fats=$fats");
+
     return FoodRecognitionResult(
-      foodName: _toStringSafe(_pick(json, ['foodName', 'FoodName'])),
-      calories: _toDouble(_pick(json, ['calories', 'Calories'])),
-      carbs: _toDouble(_pick(json, ['carbs', 'Carbs'])),
-      protein: _toDouble(_pick(json, ['protein', 'Protein', 'protien'])),
-      fats: _toDouble(_pick(json, ['fats', 'Fats'])),
-      categoryName:
-          _toStringSafe(_pick(json, ['categoryName', 'CategoryName'])),
-      confidenceScore: confidence,
+      foodName: name,
+      totalcalories: calories,
+      totalcarbs: carbs,
+      totalprotein: protein,
+      totalfats: fats,
     );
   }
 }

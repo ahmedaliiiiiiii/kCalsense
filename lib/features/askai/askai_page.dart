@@ -1,9 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:kcalsense/features/askai/view_model.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/utiles/responsive_manager.dart';
+import '../../core/utils/responsive_manager.dart';
 import 'widgets/chat_bubble.dart';
 import 'widgets/chat_input.dart';
 import 'widgets/typing_indicator.dart';

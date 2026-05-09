@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, unused_element, unused_field
+// ignore_for_file: unused_field, await_only_futures
 
 import 'dart:convert';
 
@@ -6,9 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/localization/notification_strings.dart';
 import '../../../../core/network/api_client.dart';
-import '../../../../core/storge/token_storage.dart';
-import '../../../core/diauth/service_locator.dart';
+import '../../../../core/services/meal_api_service.dart';
+import '../../../../core/storage/token_storage.dart';
+import '../../../core/di/service_locator.dart';
+import '../../../core/services/meal_event_bus.dart';
 import '../../notifications/NotificationHelper.dart';
 import '../model/home_models.dart';
 import '../view/tabs/profile/service/profile_local_storage.dart';
@@ -20,12 +23,14 @@ class HomeViewModel extends ChangeNotifier {
   final TokenStorage storage;
   final ProfileLocalStorage profileStorage = ProfileLocalStorage();
   late final FoodRecognitionApi _foodApi;
+  late final MealApiService _mealApi;
 
   HomeViewModel({required this.storage}) {
     _foodApi = FoodRecognitionApi(
       dio: sl<ApiClient>().dio,
       tokenStorage: storage,
     );
+    _mealApi = sl<MealApiService>();
   }
 
   bool isLoading = true;
@@ -34,34 +39,34 @@ class HomeViewModel extends ChangeNotifier {
   List<RecentFoodUiModel> _recentFoods = [];
   int selectedTab = 0;
   String userName = "";
-
   static const String _recentFoodsKey = 'recent_foods_list';
 
   List<RecentFoodUiModel> get recentFoods => _recentFoods;
   List<RecentFoodUiModel> get recentFoodsForHome =>
       _recentFoods.take(3).toList();
 
-  // ==================== INIT ====================
   Future<void> init() async {
     try {
       isLoading = true;
       error = null;
       notifyListeners();
 
-      userName = (await storage.getUserName()) ?? "";
+      // Load stored language for notifications
+      await NotificationStrings.loadLanguage();
 
+      userName = (await storage.getUserName()) ?? "";
       final profileData = await profileStorage.loadAll();
       int savedGoal = 2000;
       if (profileData != null && profileData['setup'] != null) {
         savedGoal =
             (profileData['setup']['dailyCaloriesTarget'] as num).round();
       }
-
-      final String todayDate = DateFormat('EEEE, MMM d').format(DateTime.now());
+      final todayDate = DateFormat('EEEE, MMM d').format(DateTime.now());
+      final today = DateTime.now();
 
       await _loadProgressFromLocal();
-      await _checkAndResetProgress(savedGoal, todayDate);
-      await _loadRecentFoodsFromPrefs();
+      await _checkAndResetProgress(savedGoal, todayDate, today);
+      await _loadTodayMeals(today);
     } catch (e) {
       error = "Something went wrong";
     } finally {
@@ -70,13 +75,13 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-  // ==================== PROGRESS ====================
-  Future<void> _checkAndResetProgress(int defaultGoal, String todayDate) async {
+  Future<void> _checkAndResetProgress(
+      int defaultGoal, String todayDate, DateTime today) async {
     final prefs = await SharedPreferences.getInstance();
     final lastDate = prefs.getString('last_progress_date');
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final todayStr = DateFormat('yyyy-MM-dd').format(today);
 
-    if (lastDate == null || lastDate != today) {
+    if (lastDate == null || lastDate != todayStr) {
       progress = TodayProgressUiModel(
         calories: 0,
         goal: defaultGoal,
@@ -85,8 +90,9 @@ class HomeViewModel extends ChangeNotifier {
         fat: 0,
         dateLabel: todayDate,
       );
-      await prefs.setString('last_progress_date', today);
+      await prefs.setString('last_progress_date', todayStr);
       await _saveProgressToLocal();
+      _recentFoods.clear();
     } else if (progress == null) {
       progress = TodayProgressUiModel(
         calories: 0,
@@ -99,6 +105,121 @@ class HomeViewModel extends ChangeNotifier {
       await _saveProgressToLocal();
     }
     notifyListeners();
+  }
+
+  /// Load today's meals — tries backend first, falls back to local storage.
+  Future<void> _loadTodayMeals(DateTime date) async {
+    try {
+      // Try backend first
+      final backendMeals = await _mealApi.getTodayMeals();
+      if (backendMeals.isNotEmpty) {
+        _recentFoods = backendMeals.map((mealMap) {
+          return _mapBackendMealToUiModel(mealMap);
+        }).toList();
+
+        // Also sync daily summary from backend
+        await _syncDailySummaryFromBackend();
+        notifyListeners();
+        return;
+      }
+    } catch (e) {
+      debugPrint('Backend getTodayMeals failed, falling back to local: $e');
+    }
+
+    // Fallback to local storage
+    final mealsData = await MealStorage.getMealsForDate(date);
+    _recentFoods = mealsData.map((mealMap) {
+      return RecentFoodUiModel(
+        name: mealMap['name'],
+        time: mealMap['time'] ?? _formatTime(DateTime.parse(mealMap['date'])),
+        calories: mealMap['calories'],
+        imagePath: mealMap['imagePath'],
+        color: _getColorForFood(mealMap['name']),
+        weight: "200 gr",
+        description: "",
+        nutrition: {
+          'calories': '${mealMap['calories']} kcal',
+          'protein': '${mealMap['protein']}g',
+          'carbs': '${mealMap['carbs']}g',
+          'fat': '${mealMap['fats']}g',
+          'fiber': '0g',
+          'sugar': '0g',
+        },
+        date: DateTime.parse(mealMap['date']),
+        mealId: mealMap['mealId'],
+      );
+    }).toList();
+    notifyListeners();
+  }
+
+  /// Map a backend meal response to our UI model.
+  RecentFoodUiModel _mapBackendMealToUiModel(Map<String, dynamic> mealMap) {
+    // Backend may return items as a nested list
+    final items = mealMap['items'] as List<dynamic>? ?? [];
+    final firstItem = items.isNotEmpty ? items.first : null;
+
+    final name = firstItem?['foodName'] ??
+        mealMap['foodName'] ??
+        mealMap['name'] ??
+        'Unknown';
+    final calories =
+        (mealMap['totalCalories'] ?? mealMap['calories'] ?? 0) as num;
+    final protein = (firstItem?['protein'] ?? mealMap['protein'] ?? 0) as num;
+    final carbs = (firstItem?['carbs'] ?? mealMap['carbs'] ?? 0) as num;
+    final fats = (firstItem?['fats'] ?? mealMap['fats'] ?? 0) as num;
+    final mealId = mealMap['mealId'] ?? mealMap['id'];
+
+    final dateStr = mealMap['loggedAt'] ??
+        mealMap['date'] ??
+        DateTime.now().toIso8601String();
+    DateTime parsedDate;
+    try {
+      parsedDate = DateTime.parse(dateStr);
+    } catch (_) {
+      parsedDate = DateTime.now();
+    }
+
+    return RecentFoodUiModel(
+      name: name.toString(),
+      time: _formatTime(parsedDate),
+      calories: calories.toInt(),
+      imagePath: mealMap['imagePath'] ?? '',
+      color: _getColorForFood(name.toString()),
+      weight: "${firstItem?['quantity'] ?? 200} gr",
+      description: "Meal type: ${mealMap['mealType'] ?? 'N/A'}",
+      nutrition: {
+        'calories': '${calories.toInt()} kcal',
+        'protein': '${protein}g',
+        'carbs': '${carbs}g',
+        'fat': '${fats}g',
+        'fiber': '0g',
+        'sugar': '0g',
+      },
+      date: parsedDate,
+      mealId: mealId,
+    );
+  }
+
+  /// Sync the progress card from the backend daily summary.
+  Future<void> _syncDailySummaryFromBackend() async {
+    try {
+      final summary = await _mealApi.getDailySummary();
+      if (summary.isNotEmpty && progress != null) {
+        progress = TodayProgressUiModel(
+          calories:
+              (summary['totalCalories'] as num?)?.toInt() ?? progress!.calories,
+          goal: progress!.goal,
+          protein:
+              (summary['totalProtein'] as num?)?.toInt() ?? progress!.protein,
+          carbs: (summary['totalCarbs'] as num?)?.toInt() ?? progress!.carbs,
+          fat: (summary['totalFats'] as num?)?.toInt() ?? progress!.fat,
+          dateLabel: progress!.dateLabel,
+        );
+        await _saveProgressToLocal();
+      }
+    } catch (e) {
+      debugPrint('Failed to sync daily summary from backend: $e');
+    }
   }
 
   Future<void> _loadProgressFromLocal() async {
@@ -116,7 +237,7 @@ class HomeViewModel extends ChangeNotifier {
         dateLabel: data['dateLabel'] as String,
       );
     } catch (e) {
-      print('Error loading progress: $e');
+      debugPrint('Error loading progress: $e');
     }
   }
 
@@ -134,13 +255,18 @@ class HomeViewModel extends ChangeNotifier {
     await prefs.setString('today_progress', jsonEncode(data));
   }
 
-  // ==================== ADD MEAL ====================
+  void addRecentFoods(List<FoodRecognitionResult> results) {
+    for (var result in results) {
+      addRecentFood(result);
+    }
+  }
+
   void addRecentFood(FoodRecognitionResult result) {
     final now = DateTime.now();
     final newFood = RecentFoodUiModel(
       name: result.foodName,
       time: _formatTime(now),
-      calories: result.calories.toInt(),
+      calories: result.totalcalories.toInt(),
       imagePath: result.imagePath.isNotEmpty
           ? result.imagePath
           : _getImageForFood(result.foodName),
@@ -148,86 +274,101 @@ class HomeViewModel extends ChangeNotifier {
       weight: "200 gr",
       description: "Analyzed from your scan - ${result.foodName}",
       nutrition: {
-        'calories': '${result.calories.toInt()} kcal',
-        'protein': '${result.protein}g',
-        'carbs': '${result.carbs}g',
-        'fat': '${result.fats}g',
+        'calories': '${result.totalcalories.toInt()} kcal',
+        'protein': '${result.totalprotein}g',
+        'carbs': '${result.totalcarbs}g',
+        'fat': '${result.totalfats}g',
         'fiber': '0g',
         'sugar': '0g',
       },
       date: now,
     );
-
     _recentFoods.insert(0, newFood);
     if (_recentFoods.length > 10) _recentFoods.removeLast();
-    _saveRecentFoodsToPrefs();
 
+    // Save locally first (immediate)
     MealStorage.saveMeal(
       date: now,
       name: result.foodName,
-      calories: result.calories.toInt(),
-      protein: result.protein,
-      carbs: result.carbs,
-      fats: result.fats,
+      calories: result.totalcalories.toInt(),
+      protein: result.totalprotein,
+      carbs: result.totalcarbs,
+      fats: result.totalfats,
       imagePath: result.imagePath,
     );
 
-    addCaloriesToProgress(result.calories.toInt(), mealName: result.foodName);
-    addMacrosToProgress(result.protein, result.carbs, result.fats);
+    // Then log to backend (async, non-blocking)
+    _logMealToBackend(result, now);
+
+    addCaloriesToProgress(result.totalcalories.toInt(),
+        mealName: result.foodName);
+    addMacrosToProgress(
+        result.totalprotein, result.totalcarbs, result.totalfats);
     notifyListeners();
+    MealEventBus().notifyMealChanged();
   }
 
-  // ==================== DELETE MEAL ====================
+  /// Log a recognized food to the backend Meal API.
+  Future<void> _logMealToBackend(
+      FoodRecognitionResult result, DateTime date) async {
+    try {
+      final mealType = MealApiService.getMealTypeFromTime();
+      final items = <Map<String, dynamic>>[
+        {
+          'foodId': 1, // Fallback food ID since recognition doesn't return one
+          'quantity': 200, // Default weight
+        }
+      ];
+
+      final response = await _mealApi.logMeal(
+        mealType: mealType,
+        items: items,
+      );
+
+      // Save the backend mealId locally for future deletion
+      final mealId = response['mealId'] ?? response['id'];
+      if (mealId != null) {
+        // Update the recent food with the mealId
+        final idx = _recentFoods.indexWhere((f) =>
+            f.name == result.foodName &&
+            f.date.difference(date).inSeconds.abs() < 5);
+        if (idx != -1) {
+          _recentFoods[idx] = _recentFoods[idx].copyWith(mealId: mealId);
+        }
+
+        // Also update local storage with mealId
+        await MealStorage.saveMeal(
+          date: date,
+          name: result.foodName,
+          calories: result.totalcalories.toInt(),
+          protein: result.totalprotein,
+          carbs: result.totalcarbs,
+          fats: result.totalfats,
+          imagePath: result.imagePath,
+          mealId: mealId,
+        );
+      }
+
+      debugPrint('✅ Meal logged to backend: $mealType, mealId: $mealId');
+    } catch (e) {
+      debugPrint('⚠️ Failed to log meal to backend (kept locally): $e');
+    }
+  }
+
   Future<void> deleteMeal(RecentFoodUiModel meal) async {
-    // 1. إزالة من القائمة المحلية وحفظ في SharedPreferences
     _recentFoods.removeWhere(
         (item) => item.name == meal.name && item.time == meal.time);
-    await _saveRecentFoodsToPrefs();
 
-    // 2. إذا كانت الوجبة من اليوم الحالي، قم بخصمها من التقدم اليومي
-    final today = DateTime.now();
-    final isSameDay = meal.date.year == today.year &&
-        meal.date.month == today.month &&
-        meal.date.day == today.day;
-
-    if (isSameDay && progress != null) {
-      // استخراج قيم الماكروز من nutrition (تفترض أن القيم بصيغة "15g")
-      final proteinValue = double.tryParse(
-              meal.nutrition['protein']?.replaceAll('g', '') ?? '0') ??
-          0;
-      final carbsValue = double.tryParse(
-              meal.nutrition['carbs']?.replaceAll('g', '') ?? '0') ??
-          0;
-      final fatValue =
-          double.tryParse(meal.nutrition['fat']?.replaceAll('g', '') ?? '0') ??
-              0;
-
-      final newCalories =
-          (progress!.calories - meal.calories).clamp(0, progress!.goal);
-      final newProtein =
-          (progress!.protein - proteinValue.toInt()).clamp(0, progress!.goal);
-      final newCarbs =
-          (progress!.carbs - carbsValue.toInt()).clamp(0, progress!.goal);
-      final newFat =
-          (progress!.fat - fatValue.toInt()).clamp(0, progress!.goal);
-
-      progress = TodayProgressUiModel(
-        calories: newCalories,
-        goal: progress!.goal,
-        protein: newProtein,
-        carbs: newCarbs,
-        fat: newFat,
-        dateLabel: progress!.dateLabel,
-      );
-      await _saveProgressToLocal();
-
-      await NotificationHelper.showNotification(
-        title: 'Meal Deleted',
-        body: '${meal.name} has been removed from today\'s progress.',
-      );
+    // Delete from backend if we have a mealId
+    if (meal.mealId != null) {
+      try {
+        await _mealApi.deleteMeal(meal.mealId);
+        debugPrint('✅ Meal deleted from backend: ${meal.mealId}');
+      } catch (e) {
+        debugPrint('⚠️ Failed to delete meal from backend: $e');
+      }
     }
 
-    // 3. حذف الوجبة من مخزن الإحصائيات (MealStorage)
     await MealStorage.deleteMeal(
       date: meal.date,
       name: meal.name,
@@ -244,14 +385,46 @@ class HomeViewModel extends ChangeNotifier {
       imagePath: meal.imagePath,
     );
 
+    final now = DateTime.now();
+    final isSameDay = meal.date.year == now.year &&
+        meal.date.month == now.month &&
+        meal.date.day == now.day;
+
+    if (isSameDay && progress != null) {
+      final proteinValue = double.tryParse(
+              meal.nutrition['protein']?.replaceAll('g', '') ?? '0') ??
+          0;
+      final carbsValue = double.tryParse(
+              meal.nutrition['carbs']?.replaceAll('g', '') ?? '0') ??
+          0;
+      final fatValue =
+          double.tryParse(meal.nutrition['fat']?.replaceAll('g', '') ?? '0') ??
+              0;
+
+      progress = TodayProgressUiModel(
+        calories: (progress!.calories - meal.calories).clamp(0, progress!.goal),
+        goal: progress!.goal,
+        protein:
+            (progress!.protein - proteinValue.toInt()).clamp(0, progress!.goal),
+        carbs: (progress!.carbs - carbsValue.toInt()).clamp(0, progress!.goal),
+        fat: (progress!.fat - fatValue.toInt()).clamp(0, progress!.goal),
+        dateLabel: progress!.dateLabel,
+      );
+      await _saveProgressToLocal();
+      await NotificationHelper.showNotification(
+        title: NotificationStrings.mealDeletedTitle,
+        body: NotificationStrings.mealDeletedBody(meal.name),
+      );
+    }
+
     notifyListeners();
+    MealEventBus().notifyMealChanged();
   }
 
-  // ==================== MACROS & CALORIES HELPERS ====================
   Future<void> addMacrosToProgress(
       double protein, double carbs, double fat) async {
     if (progress == null) return;
-    final updatedProgress = TodayProgressUiModel(
+    progress = TodayProgressUiModel(
       calories: progress!.calories,
       goal: progress!.goal,
       protein: progress!.protein + protein.toInt(),
@@ -259,32 +432,27 @@ class HomeViewModel extends ChangeNotifier {
       fat: progress!.fat + fat.toInt(),
       dateLabel: progress!.dateLabel,
     );
-    progress = updatedProgress;
     await _saveProgressToLocal();
     notifyListeners();
   }
 
   Future<void> addCaloriesToProgress(int calories, {String? mealName}) async {
     if (progress == null) return;
-    final newCalories = progress!.calories + calories;
-    final updatedProgress = TodayProgressUiModel(
-      calories: newCalories,
+    progress = TodayProgressUiModel(
+      calories: progress!.calories + calories,
       goal: progress!.goal,
       protein: progress!.protein,
       carbs: progress!.carbs,
       fat: progress!.fat,
       dateLabel: progress!.dateLabel,
     );
-    progress = updatedProgress;
     await _saveProgressToLocal();
     notifyListeners();
-
-    await _checkAndSendGoalNotification(newCalories, progress!.goal);
-
+    await _checkAndSendGoalNotification(progress!.calories, progress!.goal);
     if (mealName != null) {
       await NotificationHelper.showNotification(
-        title: 'Meal Added',
-        body: 'Successfully added $mealName ($calories kcal)',
+        title: NotificationStrings.mealAddedTitle,
+        body: NotificationStrings.mealAddedBody(mealName, calories),
       );
     }
   }
@@ -293,48 +461,22 @@ class HomeViewModel extends ChangeNotifier {
     double percentage = current / goal;
     if (percentage >= 0.9 && percentage < 1.0) {
       await NotificationHelper.showNotification(
-        title: 'Almost there!',
-        body: "You're almost at your daily calorie goal. Keep going!",
+        title: NotificationStrings.almostThereTitle,
+        body: NotificationStrings.almostThereBody,
       );
     } else if (percentage >= 1.0) {
       await NotificationHelper.showNotification(
-        title: 'Goal Reached!',
-        body: "Congratulations! You've reached your daily calorie goal.",
+        title: NotificationStrings.goalReachedTitle,
+        body: NotificationStrings.goalReachedBody,
       );
     } else if (current > goal) {
       await NotificationHelper.showNotification(
-        title: 'Over your goal!',
-        body: "You've exceeded your daily calorie goal. Time to adjust.",
+        title: NotificationStrings.overGoalTitle,
+        body: NotificationStrings.overGoalBody,
       );
     }
   }
 
-  // ==================== RECENT FOODS (SharedPreferences) ====================
-  Future<void> _loadRecentFoodsFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? jsonString = prefs.getString(_recentFoodsKey);
-    if (jsonString != null && jsonString.isNotEmpty) {
-      try {
-        final List<dynamic> decoded = jsonDecode(jsonString);
-        _recentFoods = decoded
-            .map((item) =>
-                RecentFoodUiModel.fromJson(item as Map<String, dynamic>))
-            .toList();
-        notifyListeners();
-      } catch (e) {
-        debugPrint('Error loading recent foods from prefs: $e');
-      }
-    }
-  }
-
-  Future<void> _saveRecentFoodsToPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final List<Map<String, dynamic>> jsonList =
-        _recentFoods.map((food) => food.toJson()).toList();
-    await prefs.setString(_recentFoodsKey, jsonEncode(jsonList));
-  }
-
-  // ==================== UTILITIES ====================
   String _formatTime(DateTime date) {
     final hour = date.hour;
     final minute = date.minute;

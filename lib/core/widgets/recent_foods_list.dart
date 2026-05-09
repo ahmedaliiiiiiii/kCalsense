@@ -1,9 +1,14 @@
-import 'dart:io';
+﻿import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../../core/utiles/color_manager.dart';
+import '../../../core/navigation/page_transitions.dart';
+import '../../../core/utils/color_manager.dart';
 import '../../features/home/model/home_models.dart';
+import '../../features/home/view/tabs/home_tab/FoodScreens/food_detail_screen.dart';
+import '../../features/home/viewmodel/homeviewmodel.dart';
 
 class RecentFoodsList extends StatelessWidget {
   final List<RecentFoodUiModel> items;
@@ -22,12 +27,12 @@ class RecentFoodsList extends StatelessWidget {
                 size: 48, color: context.lightGrey.withOpacity(0.5)),
             const SizedBox(height: 16),
             Text(
-              "No recent foods yet",
+              "home.No_recent_foods_yet".tr(),
               style: TextStyle(fontSize: 16, color: context.lightGrey),
             ),
             const SizedBox(height: 8),
             Text(
-              "Scan a meal to see it here",
+              "home.scan_meal".tr(),
               style: TextStyle(
                   fontSize: 14, color: context.lightGrey.withOpacity(0.8)),
             ),
@@ -47,6 +52,14 @@ class _RecentFoodTile extends StatelessWidget {
 
   const _RecentFoodTile({required this.item});
 
+  void _navigateToDetail(BuildContext context) {
+    final homeVm = Provider.of<HomeViewModel>(context, listen: false);
+    context.pushWithTransition(
+      FoodDetailScreen(meal: item, homeViewModel: homeVm),
+      type: TransitionType.fromBottom,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -62,68 +75,71 @@ class _RecentFoodTile extends StatelessWidget {
     final timeSize = (w * 0.032).clamp(10.0, 13.0);
     final badgeSize = (w * 0.03).clamp(10.0, 12.0);
 
-    return Container(
-      margin: EdgeInsets.only(bottom: h * 0.012),
-      padding: EdgeInsets.all(pad),
-      decoration: BoxDecoration(
-        color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: context.cardShadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: _buildImage(imgW, imgH, w, context),
-          ),
-          SizedBox(width: gap),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: nameSize,
-                    fontWeight: FontWeight.w800,
-                    color: context.textColor,
-                  ),
-                ),
-                SizedBox(height: h * 0.003),
-                Text(
-                  item.time,
-                  style: TextStyle(
-                    fontSize: timeSize,
-                    color: context.lightGrey,
-                  ),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () => _navigateToDetail(context),
+      child: Container(
+        margin: EdgeInsets.only(bottom: h * 0.012),
+        padding: EdgeInsets.all(pad),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: context.cardShadow,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: context.disabledColor.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(20),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _buildImage(imgW, imgH, w, context),
             ),
-            child: Text(
-              "${item.calories} cal",
-              style: TextStyle(
-                fontSize: badgeSize,
-                fontWeight: FontWeight.w700,
-                color: context.textColor,
+            SizedBox(width: gap),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: nameSize,
+                      fontWeight: FontWeight.w800,
+                      color: context.textColor,
+                    ),
+                  ),
+                  SizedBox(height: h * 0.003),
+                  Text(
+                    item.time,
+                    style: TextStyle(
+                      fontSize: timeSize,
+                      color: context.lightGrey,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: context.disabledColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                "${item.calories} cal",
+                style: TextStyle(
+                  fontSize: badgeSize,
+                  fontWeight: FontWeight.w700,
+                  color: context.textColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

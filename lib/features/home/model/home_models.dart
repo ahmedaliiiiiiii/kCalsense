@@ -23,7 +23,8 @@ class RecentFoodUiModel {
   final String weight;
   final String description;
   final Map<String, String> nutrition;
-  final DateTime date; // ✅ تاريخ الوجبة (اليوم الذي أضيفت فيه)
+  final DateTime date;
+  final dynamic mealId; // Backend meal ID for API operations
 
   const RecentFoodUiModel({
     required this.name,
@@ -35,7 +36,34 @@ class RecentFoodUiModel {
     required this.description,
     required this.nutrition,
     required this.date,
+    this.mealId,
   });
+
+  RecentFoodUiModel copyWith({
+    String? name,
+    String? time,
+    int? calories,
+    Color? color,
+    String? imagePath,
+    String? weight,
+    String? description,
+    Map<String, String>? nutrition,
+    DateTime? date,
+    dynamic mealId,
+  }) {
+    return RecentFoodUiModel(
+      name: name ?? this.name,
+      time: time ?? this.time,
+      calories: calories ?? this.calories,
+      color: color ?? this.color,
+      imagePath: imagePath ?? this.imagePath,
+      weight: weight ?? this.weight,
+      description: description ?? this.description,
+      nutrition: nutrition ?? this.nutrition,
+      date: date ?? this.date,
+      mealId: mealId ?? this.mealId,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -47,6 +75,7 @@ class RecentFoodUiModel {
         'description': description,
         'nutrition': nutrition,
         'date': date.toIso8601String(),
+        if (mealId != null) 'mealId': mealId,
       };
 
   factory RecentFoodUiModel.fromJson(Map<String, dynamic> json) {
@@ -60,6 +89,7 @@ class RecentFoodUiModel {
       description: json['description'] as String,
       nutrition: Map<String, String>.from(json['nutrition']),
       date: DateTime.parse(json['date'] as String),
+      mealId: json['mealId'],
     );
   }
 }

@@ -1,8 +1,8 @@
-// ignore_for_file: deprecated_member_use
+﻿// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 
-import '../../../core/utiles/responsive_manager.dart';
+import '../../../core/utils/responsive_manager.dart';
 import '../chat_message.dart';
 
 class AnimatedChatBubble extends StatefulWidget {
@@ -57,10 +57,10 @@ class _AnimatedChatBubbleState extends State<AnimatedChatBubble>
         child: Row(
           mainAxisAlignment: isUser
               ? MainAxisAlignment.end
-              : MainAxisAlignment.start, // ✅ محاذاة حسب المستخدم
+              : MainAxisAlignment.start, // âœ… Ù…Ø­Ø§Ø°Ø§Ø© Ø­Ø³Ø¨ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ AI message (يسار)
+            // âœ… AI message (ÙŠØ³Ø§Ø±)
             if (!isUser) ...[
               _buildAiAvatar(),
               SizedBox(width: ResponsiveManager.spacingSmall),
@@ -87,7 +87,7 @@ class _AnimatedChatBubbleState extends State<AnimatedChatBubble>
               ),
             ],
 
-            // ✅ User message (يمين)
+            // âœ… User message (ÙŠÙ…ÙŠÙ†)
             if (isUser) ...[
               Flexible(
                 child: Container(

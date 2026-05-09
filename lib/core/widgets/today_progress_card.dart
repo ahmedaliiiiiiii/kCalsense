@@ -2,8 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/home/model/home_models.dart';
-import '../utiles/color_manager.dart';
-import '../utiles/responsive_manager.dart';
+import '../utils/color_manager.dart';
+import '../utils/responsive_manager.dart';
 
 class TodayProgressCard extends StatelessWidget {
   final TodayProgressUiModel progress;
@@ -38,7 +38,7 @@ class TodayProgressCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "home.greeting.today_progress".tr(), // ✅ المفتاح الصحيح
+                "home.greeting.today_progress".tr(),
                 style: TextStyle(
                   fontSize: ResponsiveManager.bodyLarge,
                   fontWeight: FontWeight.w700,
@@ -135,7 +135,7 @@ class _Macro extends StatelessWidget {
           vertical: ResponsiveManager.spacingMedium,
         ),
         decoration: BoxDecoration(
-          color: context.dividerColor.withValues(alpha: 0.5),
+          color: context.dividerColor.withOpacity(0.5),
           borderRadius: BorderRadius.circular(ResponsiveManager.radiusMedium),
         ),
         child: Column(

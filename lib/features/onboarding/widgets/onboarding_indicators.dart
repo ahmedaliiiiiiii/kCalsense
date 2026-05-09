@@ -1,9 +1,9 @@
-// lib/features/onboarding/widgets/onboarding_indicators.dart
+﻿// lib/features/onboarding/widgets/onboarding_indicators.dart
 
 import 'package:flutter/material.dart';
 
-import '../../../core/utiles/color_manager.dart';
-import '../../../core/utiles/responsive_manager.dart';
+import '../../../core/utils/color_manager.dart';
+import '../../../core/utils/responsive_manager.dart';
 
 class OnboardingIndicators extends StatelessWidget {
   final int currentPage;
@@ -47,7 +47,7 @@ class OnboardingIndicators extends StatelessWidget {
         shape: BoxShape.circle,
         color: isActive
             ? context.primaryColor
-            : context.lightGrey, // ✅ استخدام context
+            : context.lightGrey, // âœ… Ø§Ø³ØªØ®Ø¯Ø§Ù… context
       ),
     );
   }

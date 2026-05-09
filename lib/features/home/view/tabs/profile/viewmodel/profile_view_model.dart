@@ -1,17 +1,24 @@
+// lib/features/home/view/tabs/profile/viewmodel/profile_view_model.dart
+
 import 'package:flutter/foundation.dart';
 
-import '../../../../../../core/storge/token_storage.dart';
+import '../../../../../../core/di/service_locator.dart';
+import '../../../../../../core/storage/app_prefs.dart';
+import '../../../../../../core/storage/token_storage.dart';
 import '../service/profile_local_storage.dart';
 import 'profile_api_models.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   final ProfileLocalStorage _local;
   final TokenStorage _tokenStorage;
+  final AppPrefs _appPrefs;
 
   ProfileViewModel({
     required TokenStorage tokenStorage,
+    AppPrefs? appPrefs,
     ProfileLocalStorage? local,
   })  : _tokenStorage = tokenStorage,
+        _appPrefs = appPrefs ?? sl<AppPrefs>(),
         _local = local ?? ProfileLocalStorage();
 
   bool isLoading = true;
@@ -24,8 +31,8 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final userName = (await _tokenStorage.getUserName()) ?? "User";
-      final email = (await _tokenStorage.getEmail()) ?? "user@mail.com";
+      final userName = _tokenStorage.getUserName() ?? "User";
+      final email = _tokenStorage.getEmail() ?? "user@mail.com";
 
       final all = await _local.loadAll();
       if (all == null) {
@@ -95,6 +102,31 @@ class ProfileViewModel extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> signOut() async {
+    try {
+      // حفظ الإعدادات الأساسية قبل مسح البيانات
+      final lang = _appPrefs.languageCode;
+      final theme = _appPrefs.themeMode;
+      final isFirstLaunch = _appPrefs.isFirstLaunch;
+
+      // مسح كافة البيانات
+      await _appPrefs.clearAll();
+
+      // إعادة تعيين الإعدادات الأساسية لضمان عدم عودة المستخدم لشاشة اللغة
+      if (lang != null) await _appPrefs.saveLanguage(lang);
+      if (theme != null) await _appPrefs.saveThemeMode(theme);
+      if (!isFirstLaunch) await _appPrefs.setFirstLaunchCompleted();
+      
+      // تأكيد تسجيل الخروج
+      await _appPrefs.setLoggedIn(false);
+      await _tokenStorage.clear();
+      await _local.clear();
+    } catch (e) {
+      debugPrint("Error during signOut: $e");
+    }
+    notifyListeners();
   }
 }
 

@@ -30,7 +30,7 @@ String userFriendlyMessage(Object error) {
   }
 
   if (status == 404) {
-    return "you don’t have acount.";
+    return "You don’t have an account.";
   }
 
   if (status != null && status >= 500) {

@@ -11,10 +11,10 @@ class ScanSnackEffect {
 class ScanState {
   final File? image;
   final bool isLoading;
-  final FoodRecognitionResult? result;
+  final List<FoodRecognitionResult>? result; // ✅ قائمة
   final String? errorMessage;
   final ScanSnackEffect? effect;
-  final bool resultShown; // متغير جديد لمنع تكرار العرض
+  final bool resultShown;
 
   const ScanState({
     required this.image,
@@ -22,7 +22,7 @@ class ScanState {
     required this.result,
     required this.errorMessage,
     required this.effect,
-    this.resultShown = false, // القيمة الافتراضية false
+    this.resultShown = false,
   });
 
   factory ScanState.initial() => const ScanState(
@@ -37,7 +37,7 @@ class ScanState {
   ScanState copyWith({
     File? image,
     bool? isLoading,
-    FoodRecognitionResult? result,
+    List<FoodRecognitionResult>? result,
     String? errorMessage,
     ScanSnackEffect? effect,
     bool? resultShown,

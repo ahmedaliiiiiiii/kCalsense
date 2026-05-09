@@ -1,10 +1,11 @@
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: depend_on_referenced_packages, await_only_futures
 
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../../../../../core/storge/token_storage.dart';
+import '../../../../../../core/di/service_locator.dart';
+import '../../../../../../core/storage/token_storage.dart';
 import '../viewmodel/profile_api_models.dart';
 
 class ProfileApiService {
@@ -12,15 +13,18 @@ class ProfileApiService {
   final TokenStorage _tokenStorage;
 
   ProfileApiService({TokenStorage? tokenStorage})
-      : _tokenStorage = tokenStorage ?? TokenStorage();
+      : _tokenStorage = sl<TokenStorage>();
 
   Future<Map<String, String>> _headers() async {
     final token = await _tokenStorage.getToken();
-    return {
+    final Map<String, String> headers = {
       "Content-Type": "application/json",
       "Accept": "application/json",
-      if (token != null && token.isNotEmpty) "Authorization": "Bearer $token",
     };
+    if (token != null && token.isNotEmpty) {
+      headers["Authorization"] = "Bearer $token";
+    }
+    return headers;
   }
 
   Future<ProfileSetupResponse> setup(ProfileSetupRequest req) async {
