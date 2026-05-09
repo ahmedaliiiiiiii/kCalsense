@@ -160,7 +160,8 @@ class ProfileSettingsCard extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 "profile.cancel".tr(),
-                style: TextStyle(color: context.lightGrey),
+                style:
+                    TextStyle(color: ColorManager.primaryColor, fontSize: 16),
               ),
             ),
           ],
@@ -605,5 +606,4 @@ class ProfileSettingsCard extends StatelessWidget {
       ),
     );
   }
-
 }

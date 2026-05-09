@@ -6,27 +6,28 @@ class ApiEndpoints {
   static String get baseUrl => AppConfig.baseUrl;
 
   // Auth
-  static const login = '/Auth/login';
-  static const register = '/Auth/register';
+  static const String login = '/Auth/login';
+  static const String register = '/Auth/register';
+  static const String forgotPassword = '/Auth/forgot-password';
+  static const String verifyOtp = '/Auth/verifyotp';
+  static const String resetPassword = '/Auth/resetpassword';
 
   // Food Recognition
-  static const recentFoods = '/foodrecognition/recent';
-  static const recognizeFood = '/foodrecognition/recognize';
+  static const String recentFoods = '/foodrecognition/recent';
+  static const String recognizeFood = '/foodrecognition/recognize';
 
   // Profile
-  static const profileSetup = '/Profile/setup';
-  static const profileUpdate = '/Profile/update';
+  static const String profile = '/Profile';
+  static const String profileSetup = '/Profile/setup';
+  static const String profileUpdate = '/Profile/update';
 
   // Meal
-  static const mealFoods = '/Meal/foods';
-  static const mealLog = '/Meal/log';
-  static const mealToday = '/Meal/today';
-  static const mealDailySummary = '/Meal/daily-summary';
-  static const mealHistory = '/Meal/history';
-  /// Usage: '${ApiEndpoints.mealDelete}/$mealId'
-  static const mealDelete = '/Meal';
-  /// Usage: '${ApiEndpoints.mealUpdateType}/$mealId/type'
-  static const mealUpdateType = '/Meal';
-  /// Usage: '${ApiEndpoints.mealUpdateItems}/$mealId/items'
-  static const mealUpdateItems = '/Meal';
+  static const String mealFoods = '/Meal/foods';
+  static const String mealLog = '/Meal/log';
+  static const String mealToday = '/Meal/today';
+  static const String mealDailySummary = '/Meal/daily-summary';
+  static const String mealHistory = '/Meal/history';
+  static const String mealDelete = '/Meal';
+  static const String mealUpdateType = '/Meal';
+  static const String mealUpdateItems = '/Meal';
 }

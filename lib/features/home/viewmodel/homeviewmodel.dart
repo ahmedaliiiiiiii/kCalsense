@@ -51,7 +51,6 @@ class HomeViewModel extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      // Load stored language for notifications
       await NotificationStrings.loadLanguage();
 
       userName = (await storage.getUserName()) ?? "";
@@ -107,17 +106,13 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Load today's meals — tries backend first, falls back to local storage.
   Future<void> _loadTodayMeals(DateTime date) async {
     try {
-      // Try backend first
       final backendMeals = await _mealApi.getTodayMeals();
       if (backendMeals.isNotEmpty) {
         _recentFoods = backendMeals.map((mealMap) {
           return _mapBackendMealToUiModel(mealMap);
         }).toList();
-
-        // Also sync daily summary from backend
         await _syncDailySummaryFromBackend();
         notifyListeners();
         return;
@@ -126,7 +121,6 @@ class HomeViewModel extends ChangeNotifier {
       debugPrint('Backend getTodayMeals failed, falling back to local: $e');
     }
 
-    // Fallback to local storage
     final mealsData = await MealStorage.getMealsForDate(date);
     _recentFoods = mealsData.map((mealMap) {
       return RecentFoodUiModel(
@@ -152,12 +146,9 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Map a backend meal response to our UI model.
   RecentFoodUiModel _mapBackendMealToUiModel(Map<String, dynamic> mealMap) {
-    // Backend may return items as a nested list
     final items = mealMap['items'] as List<dynamic>? ?? [];
     final firstItem = items.isNotEmpty ? items.first : null;
-
     final name = firstItem?['foodName'] ??
         mealMap['foodName'] ??
         mealMap['name'] ??
@@ -200,7 +191,6 @@ class HomeViewModel extends ChangeNotifier {
     );
   }
 
-  /// Sync the progress card from the backend daily summary.
   Future<void> _syncDailySummaryFromBackend() async {
     try {
       final summary = await _mealApi.getDailySummary();
@@ -286,7 +276,6 @@ class HomeViewModel extends ChangeNotifier {
     _recentFoods.insert(0, newFood);
     if (_recentFoods.length > 10) _recentFoods.removeLast();
 
-    // Save locally first (immediate)
     MealStorage.saveMeal(
       date: now,
       name: result.foodName,
@@ -297,7 +286,6 @@ class HomeViewModel extends ChangeNotifier {
       imagePath: result.imagePath,
     );
 
-    // Then log to backend (async, non-blocking)
     _logMealToBackend(result, now);
 
     addCaloriesToProgress(result.totalcalories.toInt(),
@@ -308,35 +296,25 @@ class HomeViewModel extends ChangeNotifier {
     MealEventBus().notifyMealChanged();
   }
 
-  /// Log a recognized food to the backend Meal API.
   Future<void> _logMealToBackend(
       FoodRecognitionResult result, DateTime date) async {
     try {
       final mealType = MealApiService.getMealTypeFromTime();
       final items = <Map<String, dynamic>>[
-        {
-          'foodId': 1, // Fallback food ID since recognition doesn't return one
-          'quantity': 200, // Default weight
-        }
+        {'foodId': 1, 'quantity': 200}
       ];
-
       final response = await _mealApi.logMeal(
         mealType: mealType,
         items: items,
       );
-
-      // Save the backend mealId locally for future deletion
       final mealId = response['mealId'] ?? response['id'];
       if (mealId != null) {
-        // Update the recent food with the mealId
         final idx = _recentFoods.indexWhere((f) =>
             f.name == result.foodName &&
             f.date.difference(date).inSeconds.abs() < 5);
         if (idx != -1) {
           _recentFoods[idx] = _recentFoods[idx].copyWith(mealId: mealId);
         }
-
-        // Also update local storage with mealId
         await MealStorage.saveMeal(
           date: date,
           name: result.foodName,
@@ -348,7 +326,6 @@ class HomeViewModel extends ChangeNotifier {
           mealId: mealId,
         );
       }
-
       debugPrint('✅ Meal logged to backend: $mealType, mealId: $mealId');
     } catch (e) {
       debugPrint('⚠️ Failed to log meal to backend (kept locally): $e');
@@ -358,8 +335,6 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> deleteMeal(RecentFoodUiModel meal) async {
     _recentFoods.removeWhere(
         (item) => item.name == meal.name && item.time == meal.time);
-
-    // Delete from backend if we have a mealId
     if (meal.mealId != null) {
       try {
         await _mealApi.deleteMeal(meal.mealId);
@@ -368,7 +343,6 @@ class HomeViewModel extends ChangeNotifier {
         debugPrint('⚠️ Failed to delete meal from backend: $e');
       }
     }
-
     await MealStorage.deleteMeal(
       date: meal.date,
       name: meal.name,
@@ -411,9 +385,11 @@ class HomeViewModel extends ChangeNotifier {
         dateLabel: progress!.dateLabel,
       );
       await _saveProgressToLocal();
-      await NotificationHelper.showNotification(
-        title: NotificationStrings.mealDeletedTitle,
-        body: NotificationStrings.mealDeletedBody(meal.name),
+
+      // ✅ إشعار بحذف الوجبة (الأسلوب الجديد)
+      await NotificationHelper.showNotificationFromEvent(
+        eventType: 'meal_deleted',
+        params: {'mealName': meal.name},
       );
     }
 
@@ -450,9 +426,10 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
     await _checkAndSendGoalNotification(progress!.calories, progress!.goal);
     if (mealName != null) {
-      await NotificationHelper.showNotification(
-        title: NotificationStrings.mealAddedTitle,
-        body: NotificationStrings.mealAddedBody(mealName, calories),
+      // ✅ إشعار بإضافة الوجبة (الأسلوب الجديد)
+      await NotificationHelper.showNotificationFromEvent(
+        eventType: 'meal_added',
+        params: {'mealName': mealName, 'calories': calories},
       );
     }
   }
@@ -460,19 +437,16 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> _checkAndSendGoalNotification(int current, int goal) async {
     double percentage = current / goal;
     if (percentage >= 0.9 && percentage < 1.0) {
-      await NotificationHelper.showNotification(
-        title: NotificationStrings.almostThereTitle,
-        body: NotificationStrings.almostThereBody,
+      await NotificationHelper.showNotificationFromEvent(
+        eventType: 'goal_almost',
       );
     } else if (percentage >= 1.0) {
-      await NotificationHelper.showNotification(
-        title: NotificationStrings.goalReachedTitle,
-        body: NotificationStrings.goalReachedBody,
+      await NotificationHelper.showNotificationFromEvent(
+        eventType: 'goal_reached',
       );
     } else if (current > goal) {
-      await NotificationHelper.showNotification(
-        title: NotificationStrings.overGoalTitle,
-        body: NotificationStrings.overGoalBody,
+      await NotificationHelper.showNotificationFromEvent(
+        eventType: 'goal_over',
       );
     }
   }

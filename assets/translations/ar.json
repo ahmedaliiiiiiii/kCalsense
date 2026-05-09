@@ -1,11 +1,12 @@
 {
-  "settings": {
-    "title": "KCalsense",
-    "subtitle": "خصص تجربتك",
+  "start": {
+    "title": "مرحباً بك في KCalsense",
+    "subtitle": "خصص تجربتك بالكامل",
     "language": "اللغة",
-    "dark_mode": "الوضع الداكن",
-    "continue": "استمرار",
-    "skip": "تخطي الآن"
+    "appearance": "المظهر",
+    "dark": "داكن",
+    "light": "فاتح",
+    "get_started": "ابدأ الآن"
   },
   "home": {
     "greeting": {
@@ -143,21 +144,17 @@
     "moderately_active": "نشاط متوسط (3-5 أيام/أسبوع)",
     "highly_active": "نشاط عالي (6-7 أيام/أسبوع)"
   },
-  "notifications": {
-    "title": "الإشعارات",
-    "no_notifications": "لا توجد إشعارات",
-    "meal_logged": "تم تسجيل الوجبة",
-    "meal_logged_message": "لقد سجلت",
-    "goal_achieved": "تم تحقيق الهدف",
-    "goal_achieved_message": "لقد وصلت إلى هدف البروتين!",
-    "reminder": "تذكير",
-    "reminder_message": "وقت تسجيل الغداء",
-    "health_tip": "نصيحة صحية",
-    "health_tip_message": "اشرب الماء قبل الوجبات",
-    "minutes_ago": "دقيقة مضت",
-    "hour_ago": "ساعة مضت",
-    "hours_ago": "ساعات مضت",
-    "yesterday": "أمس"
+  "notification": {
+    "meal_deleted_title": "تم حذف الوجبة",
+    "meal_deleted_body": "تم حذف {mealName} من تقدم اليوم",
+    "meal_added_title": "تم إضافة الوجبة",
+    "meal_added_body": "تم إضافة {mealName} بنجاح ({calories} سعرة)",
+    "almost_there_title": "قاربنا على الهدف",
+    "almost_there_body": "أنت على وشك الوصول إلى هدفك اليومي. استمر!",
+    "goal_reached_title": "تم الوصول للهدف",
+    "goal_reached_body": "تهانينا! لقد وصلت إلى هدفك اليومي من السعرات.",
+    "over_goal_title": "تجاوزت الهدف",
+    "over_goal_body": "لقد تجاوزت هدفك اليومي. حان وقت التعديل."
   },
   "time": {
     "now": "الآن",

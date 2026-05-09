@@ -1,10 +1,11 @@
 ﻿// lib/features/onboarding/onboarding_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; // ✅ import المطلوب
+import 'package:go_router/go_router.dart';
 
-import '../../core/router/app_router.dart'; // ✅ لإستخدام AppRouter.login
-import '../../core/utils/color_manager.dart';
+import '../../core/di/service_locator.dart'; // ✅ أضفنا هذا السطر
+import '../../core/router/app_router.dart';
+import '../../core/storage/app_prefs.dart'; // ✅ أضفنا هذا السطر
 import '../../core/utils/responsive_manager.dart';
 import '../onboarding/widgets/onboarding_indicators.dart';
 import '../onboarding/widgets/onboarding_page.dart';
@@ -79,7 +80,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen>
         curve: Curves.easeInOutCubic,
       );
     } else {
-      _navigateToLogin();
+      await _navigateToLogin(); // ✅ أضفنا await هنا
     }
   }
 
@@ -99,9 +100,17 @@ class _OnBoardingScreenState extends State<OnBoardingScreen>
     _navigateToLogin();
   }
 
-  void _navigateToLogin() {
+  // ✅ التعديل الجوهري هنا
+  Future<void> _navigateToLogin() async {
     if (!mounted) return;
-    context.go(AppRouter.login);
+
+    // حفظ حالة انتهاء أول تشغيل في التفضيلات لفتح الطريق في الـ Router
+    final AppPrefs appPrefs = sl<AppPrefs>();
+    await appPrefs.setFirstLaunchCompleted();
+
+    if (mounted) {
+      context.go(AppRouter.login);
+    }
   }
 
   @override
@@ -109,7 +118,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen>
     ResponsiveManager.init(context);
 
     return Scaffold(
-      backgroundColor: context.backgroundColor,
+      backgroundColor: Theme.of(context).dialogBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [

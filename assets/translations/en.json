@@ -1,11 +1,12 @@
 {
-  "settings": {
-    "title": "KCalsense",
-    "subtitle": "Customize Your Experience",
+  "start": {
+    "title": "Welcome to KCalsense",
+    "subtitle": "Customize your experience",
     "language": "Language",
-    "dark_mode": "Dark Mode",
-    "continue": "Continue",
-    "skip": "Skip for now"
+    "appearance": "Appearance",
+    "dark": "Dark",
+    "light": "Light",
+    "get_started": "Get Started"
   },
   "home": {
     "greeting": {
@@ -146,21 +147,17 @@
     "maintain_weight": "Maintain Weight",
     "gain_weight": "Gain Weight"
   },
-  "notifications": {
-    "title": "Notifications",
-    "no_notifications": "No notifications",
-    "meal_logged": "Meal Logged",
-    "meal_logged_message": "You logged",
-    "goal_achieved": "Goal Achieved",
-    "goal_achieved_message": "You reached your protein goal!",
-    "reminder": "Reminder",
-    "reminder_message": "Time to log your lunch",
-    "health_tip": "Health Tip",
-    "health_tip_message": "Drink water before meals",
-    "minutes_ago": "min ago",
-    "hour_ago": "hour ago",
-    "hours_ago": "hours ago",
-    "yesterday": "Yesterday"
+  "notification": {
+    "meal_deleted_title": "Meal Deleted",
+    "meal_deleted_body": "{mealName} has been removed from today's progress.",
+    "meal_added_title": "Meal Added",
+    "meal_added_body": "Successfully added {mealName} ({calories} kcal)",
+    "almost_there_title": "Almost there!",
+    "almost_there_body": "You're almost at your daily calorie goal. Keep going!",
+    "goal_reached_title": "Goal Reached!",
+    "goal_reached_body": "Congratulations! You've reached your daily calorie goal.",
+    "over_goal_title": "Over your goal!",
+    "over_goal_body": "You've exceeded your daily calorie goal. Time to adjust."
   },
   "time": {
     "now": "Just now",

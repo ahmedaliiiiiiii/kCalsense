@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/utils/responsive_manager.dart';
-import '../../../../../../core/widgets/app_button.dart'; // ✅ استخدم الزر الموحد
+import '../../../../../../core/widgets/app_button.dart';
 import '../model/food_recognition_result.dart';
 
 class AnalysisResultsSheet extends StatelessWidget {
@@ -26,14 +26,18 @@ class AnalysisResultsSheet extends StatelessWidget {
     ResponsiveManager.init(context);
     final theme = Theme.of(context);
     final isSmallScreen = ResponsiveManager.isSmallScreen;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     // أحجام خطوط متجاوبة
     final titleFontSize = isSmallScreen ? 22.0 : 26.0;
     final subtitleFontSize = isSmallScreen ? 14.0 : 16.0;
-    final foodNameFontSize = isSmallScreen ? 15.0 : 17.0;
+    final foodNameFontSize = isSmallScreen ? 14.0 : 16.0;
     final macroTitleFontSize = isSmallScreen ? 18.0 : 20.0;
     final macroValueFontSize = isSmallScreen ? 18.0 : 22.0;
     final macroUnitFontSize = isSmallScreen ? 12.0 : 14.0;
+
+    // أقصى عرض للشريحة (يمنعها من تجاوز الشاشة)
+    final chipMaxWidth = screenWidth * 0.8;
 
     return Container(
       decoration: BoxDecoration(
@@ -43,7 +47,7 @@ class AnalysisResultsSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle (مؤشر السحب)
+          // Handle
           Center(
             child: Container(
               width: 40,
@@ -109,16 +113,19 @@ class AnalysisResultsSheet extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  // الأطعمة المكتشفة (Chips)
+                  // أسماء الأطعمة – كل شريحة مرنة في العرض (حد أقصى)
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: results
                         .map(
-                          (r) => _buildFoodChip(
-                            r.foodName,
-                            theme,
-                            foodNameFontSize,
+                          (r) => ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: chipMaxWidth),
+                            child: _buildFoodChip(
+                              r.foodName,
+                              theme,
+                              foodNameFontSize,
+                            ),
                           ),
                         )
                         .toList(),
@@ -134,59 +141,65 @@ class AnalysisResultsSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // شبكة المغذيات
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 2.2,
-                    children: [
-                      _buildMacroCard(
-                        "scan.calories".tr(),
-                        mainResult.totalcalories.toStringAsFixed(0),
-                        'kcal',
-                        Icons.local_fire_department_outlined,
-                        theme,
-                        macroValueFontSize,
-                        macroUnitFontSize,
-                      ),
-                      _buildMacroCard(
-                        "scan.protein".tr(),
-                        mainResult.totalprotein.toStringAsFixed(1),
-                        'g',
-                        Icons.fitness_center_outlined,
-                        theme,
-                        macroValueFontSize,
-                        macroUnitFontSize,
-                      ),
-                      _buildMacroCard(
-                        "scan.carbs".tr(),
-                        mainResult.totalcarbs.toStringAsFixed(1),
-                        'g',
-                        Icons.rice_bowl_outlined,
-                        theme,
-                        macroValueFontSize,
-                        macroUnitFontSize,
-                      ),
-                      _buildMacroCard(
-                        "scan.fat".tr(),
-                        mainResult.totalfats.toStringAsFixed(1),
-                        'g',
-                        Icons.opacity_outlined,
-                        theme,
-                        macroValueFontSize,
-                        macroUnitFontSize,
-                      ),
-                    ],
+                  // شبكة المغذيات المتجاوبة
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      double aspectRatio =
+                          constraints.maxWidth < 300 ? 2.0 : 2.2;
+                      return GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: aspectRatio,
+                        children: [
+                          _buildMacroCard(
+                            "scan.calories".tr(),
+                            mainResult.totalcalories.toStringAsFixed(0),
+                            'kcal',
+                            Icons.local_fire_department_outlined,
+                            theme,
+                            macroValueFontSize,
+                            macroUnitFontSize,
+                          ),
+                          _buildMacroCard(
+                            "scan.protein".tr(),
+                            mainResult.totalprotein.toStringAsFixed(1),
+                            'g',
+                            Icons.fitness_center_outlined,
+                            theme,
+                            macroValueFontSize,
+                            macroUnitFontSize,
+                          ),
+                          _buildMacroCard(
+                            "scan.carbs".tr(),
+                            mainResult.totalcarbs.toStringAsFixed(1),
+                            'g',
+                            Icons.rice_bowl_outlined,
+                            theme,
+                            macroValueFontSize,
+                            macroUnitFontSize,
+                          ),
+                          _buildMacroCard(
+                            "scan.fat".tr(),
+                            mainResult.totalfats.toStringAsFixed(1),
+                            'g',
+                            Icons.opacity_outlined,
+                            theme,
+                            macroValueFontSize,
+                            macroUnitFontSize,
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  const SizedBox(height: 16), // مسافة صغيرة قبل الزر
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
           ),
-          // ✅ زر "تم" باستخدام الـ AppButton المخصص
+          // زر "تم"
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
             child: AppButton(
@@ -199,13 +212,10 @@ class AnalysisResultsSheet extends StatelessWidget {
     );
   }
 
-  // Chip خاص باسم الطعام
+  // شريحة اسم الطعام – مرنة العرض والارتفاع، تسمح بالتفاف النص
   Widget _buildFoodChip(String text, ThemeData theme, double fontSize) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: theme.primaryColor.withOpacity(0.10),
         borderRadius: BorderRadius.circular(20),
@@ -213,15 +223,21 @@ class AnalysisResultsSheet extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.restaurant_menu, size: 16, color: theme.primaryColor),
           const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              color: theme.textTheme.titleLarge?.color,
-              fontWeight: FontWeight.w600,
-              fontSize: fontSize,
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: theme.textTheme.titleLarge?.color,
+                fontWeight: FontWeight.w600,
+                fontSize: fontSize,
+                height: 1.3,
+              ),
+              softWrap: true,
+              overflow: TextOverflow.visible,
             ),
           ),
         ],
@@ -229,7 +245,6 @@ class AnalysisResultsSheet extends StatelessWidget {
     );
   }
 
-  // بطاقة المغذيات (تصميم موحد)
   Widget _buildMacroCard(
     String title,
     String value,
