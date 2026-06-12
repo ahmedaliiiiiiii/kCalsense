@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 
 import '../../features/askai/askai_page.dart';
 import '../navigation/page_transitions.dart';
@@ -34,7 +35,7 @@ class HomeBottomNav extends StatelessWidget {
           // Home
           _NavItem(
             icon: Icons.home_filled,
-            label: "Home",
+            label: "home.bottom_nav.home".tr(), // ✅ المسار الصحيح
             isSelected: selectedIndex == 0,
             onTap: () => onChanged(0),
           ),
@@ -42,7 +43,7 @@ class HomeBottomNav extends StatelessWidget {
           // Scan
           _NavItem(
             icon: Icons.camera_alt_outlined,
-            label: "Scan",
+            label: "home.bottom_nav.scan".tr(), // ✅
             isSelected: selectedIndex == 1,
             onTap: () => onChanged(1),
           ),
@@ -87,7 +88,7 @@ class HomeBottomNav extends StatelessWidget {
           // Stats
           _NavItem(
             icon: Icons.show_chart,
-            label: "Stats",
+            label: "home.bottom_nav.stats".tr(), // ✅
             isSelected: selectedIndex == 2,
             onTap: () => onChanged(2),
           ),
@@ -95,7 +96,7 @@ class HomeBottomNav extends StatelessWidget {
           // Profile
           _NavItem(
             icon: Icons.person_outline,
-            label: "Profile",
+            label: "home.bottom_nav.profile".tr(), // ✅
             isSelected: selectedIndex == 3,
             onTap: () => onChanged(3),
           ),

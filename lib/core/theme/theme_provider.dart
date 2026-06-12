@@ -10,6 +10,7 @@ enum AppThemeMode {
 
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'app_theme_mode';
+  final SharedPreferences _prefs;
   AppThemeMode _themeMode = AppThemeMode.system;
 
   AppThemeMode get themeMode => _themeMode;
@@ -60,16 +61,10 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  ThemeProvider() {
-    _loadTheme();
-  }
-
-  Future<void> _loadTheme() async {
+  ThemeProvider(this._prefs) {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedIndex = prefs.getInt(_themeKey) ?? 2;
+      final savedIndex = _prefs.getInt(_themeKey) ?? 2;
       _themeMode = AppThemeMode.values[savedIndex];
-      notifyListeners();
     } catch (e) {
       debugPrint('Error loading theme: $e');
       _themeMode = AppThemeMode.system;
@@ -81,8 +76,7 @@ class ThemeProvider extends ChangeNotifier {
 
     _themeMode = mode;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_themeKey, mode.index);
+      await _prefs.setInt(_themeKey, mode.index);
     } catch (e) {
       debugPrint('Error saving theme: $e');
     }

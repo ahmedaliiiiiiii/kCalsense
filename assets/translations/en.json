@@ -9,6 +9,12 @@
     "get_started": "Get Started"
   },
   "home": {
+    "bottom_nav": {
+      "home": "Home",
+      "scan": "Scan",
+      "stats": "Stats",
+      "profile": "Profile"
+    },
     "greeting": {
       "today_progress": "Today's Progress",
       "morning": "Good morning",
@@ -148,6 +154,7 @@
     "gain_weight": "Gain Weight"
   },
   "notification": {
+    "title": "Notifications",
     "meal_deleted_title": "Meal Deleted",
     "meal_deleted_body": "{mealName} has been removed from today's progress.",
     "meal_added_title": "Meal Added",
@@ -159,12 +166,17 @@
     "over_goal_title": "Over your goal!",
     "over_goal_body": "You've exceeded your daily calorie goal. Time to adjust."
   },
+
   "time": {
     "now": "Just now",
-    "minutes_ago": "{0} minutes ago",
-    "hours_ago": "{0} hours ago",
-    "days_ago": "{0} days ago",
-    "weeks_ago": "{0} weeks ago"
+    "minutes_ago": "minutes ago",
+    "hours_ago": "hours ago",
+    "days_ago": "days ago",
+    "weeks_ago": "weeks ago"
+  },
+
+  "notifications": {
+    "no_notifications": "No notifications"
   },
   "help_center": {
     "title": "Help Center",
@@ -206,8 +218,8 @@
     "last_updated": "Last updated: January 1, 2024"
   },
   "ask_ai": {
-    "title": "Gemini Food AI",
-    "welcome": "Food & Nutrition AI",
+    "title": "AI Assistant",
+    "welcome": "AI Assistant",
     "welcome_subtitle": "Ask me anything about food, recipes, and nutrition",
     "input_hint": "Ask anything about food...",
     "clear_conversation": "Clear conversation?",
@@ -220,7 +232,7 @@
   "food_detail": {
     "food_details": "Food Details",
     "description": "Description",
-    "nutrition_facts": "Nutrition Facts"
+    "nutrition_facts": "results"
   },
   "language": {
     "title": "Choose Your Language",

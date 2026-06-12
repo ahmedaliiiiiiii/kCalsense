@@ -120,7 +120,7 @@ class _AskAiViewState extends State<_AskAiView>
                   size: ResponsiveManager.iconSmall,
                 ),
               ),
-              SizedBox(width: ResponsiveManager.spacingXSmall),
+              SizedBox(width: ResponsiveManager.spacingXXXLarge),
               Expanded(
                 child: Text(
                   "ask_ai.title".tr(),

@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../core/navigation/page_transitions.dart';
 import '../../../core/utils/color_manager.dart';
 import '../../features/home/model/home_models.dart';
-import '../../features/home/view/tabs/home_tab/FoodScreens/food_detail_screen.dart';
+import '../../features/home/view/tabs/home_tab/food_screens/food_detail_screen.dart';
 import '../../features/home/viewmodel/homeviewmodel.dart';
 
 class RecentFoodsList extends StatelessWidget {

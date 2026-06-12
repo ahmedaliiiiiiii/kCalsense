@@ -19,7 +19,7 @@ class ProfileViewModel extends ChangeNotifier {
     ProfileLocalStorage? local,
   })  : _tokenStorage = tokenStorage,
         _appPrefs = appPrefs ?? sl<AppPrefs>(),
-        _local = local ?? ProfileLocalStorage();
+        _local = local ?? sl<ProfileLocalStorage>();
 
   bool isLoading = true;
   String? error;

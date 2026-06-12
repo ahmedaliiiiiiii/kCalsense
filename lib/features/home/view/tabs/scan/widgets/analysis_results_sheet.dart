@@ -141,7 +141,6 @@ class AnalysisResultsSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // شبكة المغذيات المتجاوبة
                   LayoutBuilder(
                     builder: (context, constraints) {
                       double aspectRatio =

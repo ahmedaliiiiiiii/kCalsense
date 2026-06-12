@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../core/di/service_locator.dart';
 import '../../home/view/tabs/profile/service/profile_api_service.dart';
 import '../../home/view/tabs/profile/service/profile_local_storage.dart';
 import '../../home/view/tabs/profile/viewmodel/profile_api_models.dart';
@@ -16,7 +17,7 @@ class SetupViewModel extends ChangeNotifier {
   int step = 0;
 
   final ProfileApiService _api = ProfileApiService();
-  final ProfileLocalStorage _local = ProfileLocalStorage();
+  final ProfileLocalStorage _local = sl<ProfileLocalStorage>();
 
   bool isLoading = false;
   String? error;

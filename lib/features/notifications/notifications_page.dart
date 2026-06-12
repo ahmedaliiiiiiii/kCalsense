@@ -1,10 +1,9 @@
-// ignore_for_file: unnecessary_import
+// ignore_for_file: curly_braces_in_flow_control_structures
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:kcalsense/core/utils/color_manager.dart';
-import 'package:kcalsense/features/notifications/NotificationHelper.dart';
+import 'package:kcalsense/features/notifications/notification_helper.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -26,10 +25,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Future<void> _loadNotificationsAndMarkRead() async {
     setState(() => _isLoading = true);
     await NotificationHelper.markAllAsRead();
-    // ✅ استخدام الإشعارات المترجمة
-    final notifications = await NotificationHelper.getTranslatedNotifications();
+    final rawNotifications = await NotificationHelper.getNotifications();
+
+    // تصفية الإشعارات القديمة (بدون eventType) لتجنب النصوص غير المترجمة
+    final validNotifications =
+        rawNotifications.where((n) => n.containsKey('eventType')).toList();
+
     setState(() {
-      _notifications = notifications;
+      _notifications = validNotifications;
       _isLoading = false;
     });
   }
@@ -42,13 +45,91 @@ class _NotificationsPageState extends State<NotificationsPage> {
   String _getTimeAgo(DateTime timestamp) {
     final now = DateTime.now();
     final diff = now.difference(timestamp);
-    final locale = context.locale;
-    if (diff.inSeconds < 60) return "Just now";
-    if (diff.inMinutes < 60) return "${diff.inMinutes}m ago";
-    if (diff.inHours < 24) return "${diff.inHours}h ago";
-    if (diff.inDays < 7) return "${diff.inDays}d ago";
-    if (diff.inDays < 30) return "${(diff.inDays / 7).floor()}w ago";
-    return DateFormat('dd/MM/yyyy', locale.languageCode).format(timestamp);
+    final isArabic = context.locale.languageCode == 'ar';
+
+    if (diff.inSeconds < 60) {
+      return isArabic ? "الآن" : "Just now";
+    } else if (diff.inMinutes < 60) {
+      final minutes = diff.inMinutes;
+      if (isArabic) {
+        return minutes == 1 ? "منذ دقيقة واحدة" : "منذ $minutes دقائق";
+      } else {
+        return minutes == 1 ? "1 minute ago" : "$minutes minutes ago";
+      }
+    } else if (diff.inHours < 24) {
+      final hours = diff.inHours;
+      if (isArabic) {
+        return hours == 1 ? "منذ ساعة واحدة" : "منذ $hours ساعات";
+      } else {
+        return hours == 1 ? "1 hour ago" : "$hours hours ago";
+      }
+    } else if (diff.inDays < 7) {
+      final days = diff.inDays;
+      if (isArabic) {
+        return days == 1 ? "منذ يوم واحد" : "منذ $days أيام";
+      } else {
+        return days == 1 ? "1 day ago" : "$days days ago";
+      }
+    } else if (diff.inDays < 30) {
+      final weeks = (diff.inDays / 7).floor();
+      if (isArabic) {
+        return weeks == 1 ? "منذ أسبوع واحد" : "منذ $weeks أسابيع";
+      } else {
+        return weeks == 1 ? "1 week ago" : "$weeks weeks ago";
+      }
+    } else {
+      // أكثر من شهر: عرض التاريخ
+      return DateFormat('dd/MM/yyyy', context.locale.languageCode)
+          .format(timestamp);
+    }
+  }
+
+  String _getTitleForEvent(String eventType, Map<String, dynamic>? params) {
+    switch (eventType) {
+      case 'meal_deleted':
+        return 'notification.meal_deleted_title'.tr();
+      case 'meal_added':
+        return 'notification.meal_added_title'.tr();
+      case 'goal_almost':
+        return 'notification.almost_there_title'.tr();
+      case 'goal_reached':
+        return 'notification.goal_reached_title'.tr();
+      case 'goal_over':
+        return 'notification.over_goal_title'.tr();
+      default:
+        return '';
+    }
+  }
+
+  // ترجمة نص الإشعار حسب نوع الحدث مع استبدال المعاملات
+  String _getBodyForEvent(String eventType, Map<String, dynamic>? params) {
+    String body;
+    switch (eventType) {
+      case 'meal_deleted':
+        body = 'notification.meal_deleted_body'.tr();
+        break;
+      case 'meal_added':
+        body = 'notification.meal_added_body'.tr();
+        break;
+      case 'goal_almost':
+        body = 'notification.almost_there_body'.tr();
+        break;
+      case 'goal_reached':
+        body = 'notification.goal_reached_body'.tr();
+        break;
+      case 'goal_over':
+        body = 'notification.over_goal_body'.tr();
+        break;
+      default:
+        return '';
+    }
+    // استبدال المعاملات (مثل {mealName}, {calories})
+    if (params != null) {
+      params.forEach((key, value) {
+        body = body.replaceAll('{$key}', value.toString());
+      });
+    }
+    return body;
   }
 
   @override
@@ -66,7 +147,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               color: context.iconColor, size: w * 0.05),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text("notifications.title".tr(),
+        title: Text("notification.title".tr(),
             style: TextStyle(
                 color: context.textColor,
                 fontSize: w * 0.05,
@@ -75,8 +156,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
         actions: [
           if (_notifications.isNotEmpty)
             IconButton(
-                icon: Icon(Icons.delete_outline, color: context.lightGrey),
-                onPressed: _clearAll),
+              icon: Icon(Icons.delete_outline, color: context.lightGrey),
+              onPressed: _clearAll,
+            ),
         ],
       ),
       body: _isLoading
@@ -101,13 +183,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   padding: EdgeInsets.all(w * 0.04),
                   itemCount: _notifications.length,
                   itemBuilder: (context, index) {
-                    final notification = _notifications[index];
-                    final timestamp = DateTime.parse(notification['timestamp']);
+                    final notif = _notifications[index];
+                    final eventType = notif['eventType'] as String;
+                    final params = notif['params'] as Map<String, dynamic>?;
+                    final timestamp = DateTime.parse(notif['timestamp']);
                     final timeAgo = _getTimeAgo(timestamp);
+                    final title = _getTitleForEvent(eventType, params);
+                    final body = _getBodyForEvent(eventType, params);
+
                     return _buildNotificationItem(
                       context,
-                      title: notification['title'],
-                      message: notification['body'],
+                      title: title,
+                      message: body,
                       time: timeAgo,
                     );
                   },

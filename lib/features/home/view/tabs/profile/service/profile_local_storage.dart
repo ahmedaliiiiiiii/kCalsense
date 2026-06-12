@@ -4,13 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileLocalStorage {
   static const _kProfileAll = "profile_all";
+  final SharedPreferences _prefs;
+
+  ProfileLocalStorage(this._prefs);
 
   Future<void> saveAll({
     required Map<String, dynamic> input,
     required Map<String, dynamic> setup,
   }) async {
-    final sp = await SharedPreferences.getInstance();
-    await sp.setString(
+    await _prefs.setString(
       _kProfileAll,
       jsonEncode({
         "input": input,
@@ -20,8 +22,7 @@ class ProfileLocalStorage {
   }
 
   Future<Map<String, dynamic>?> loadAll() async {
-    final sp = await SharedPreferences.getInstance();
-    final s = sp.getString(_kProfileAll);
+    final s = _prefs.getString(_kProfileAll);
     if (s == null || s.isEmpty) return null;
 
     final decoded = jsonDecode(s);
@@ -32,7 +33,6 @@ class ProfileLocalStorage {
   }
 
   Future<void> clear() async {
-    final sp = await SharedPreferences.getInstance();
-    await sp.remove(_kProfileAll);
+    await _prefs.remove(_kProfileAll);
   }
 }

@@ -55,9 +55,8 @@ class _AnimatedChatBubbleState extends State<AnimatedChatBubble>
               : ResponsiveManager.spacingSmall,
         ),
         child: Row(
-          mainAxisAlignment: isUser
-              ? MainAxisAlignment.end
-              : MainAxisAlignment.start, // âœ… Ù…Ø­Ø§Ø°Ø§Ø© Ø­Ø³Ø¨ Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
+          mainAxisAlignment:
+              isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // âœ… AI message (ÙŠØ³Ø§Ø±)
@@ -87,7 +86,6 @@ class _AnimatedChatBubbleState extends State<AnimatedChatBubble>
               ),
             ],
 
-            // âœ… User message (ÙŠÙ…ÙŠÙ†)
             if (isUser) ...[
               Flexible(
                 child: Container(

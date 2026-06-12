@@ -6,13 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../core/localization/notification_strings.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/services/meal_api_service.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../../core/di/service_locator.dart';
 import '../../../core/services/meal_event_bus.dart';
-import '../../notifications/NotificationHelper.dart';
+import '../../notifications/notification_helper.dart';
 import '../model/home_models.dart';
 import '../view/tabs/profile/service/profile_local_storage.dart';
 import '../view/tabs/scan/api/food_recognition_api.dart';
@@ -21,7 +20,7 @@ import '../view/tabs/stats/model/meal_storage_helper.dart';
 
 class HomeViewModel extends ChangeNotifier {
   final TokenStorage storage;
-  final ProfileLocalStorage profileStorage = ProfileLocalStorage();
+  final ProfileLocalStorage profileStorage = sl<ProfileLocalStorage>();
   late final FoodRecognitionApi _foodApi;
   late final MealApiService _mealApi;
 
@@ -50,8 +49,6 @@ class HomeViewModel extends ChangeNotifier {
       isLoading = true;
       error = null;
       notifyListeners();
-
-      await NotificationStrings.loadLanguage();
 
       userName = (await storage.getUserName()) ?? "";
       final profileData = await profileStorage.loadAll();

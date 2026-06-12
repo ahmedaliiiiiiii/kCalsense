@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,14 +15,10 @@ import 'features/auth/presentation/cubit/auth_cubit.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-
-  // تهيئة SharedPreferences مرة واحدة كـ singleton
   final prefs = await SharedPreferences.getInstance();
 
-  // تهيئة الـ service locator
   await setupServiceLocator(prefs);
 
-  // تهيئة الإشعارات
   final notificationService = NotificationService();
   await notificationService.init();
   await notificationService.requestAndroidNotificationPermission();
@@ -51,7 +48,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(sl<SharedPreferences>())),
         BlocProvider<AuthCubit>(create: (_) => sl<AuthCubit>()),
       ],
       child: Consumer<ThemeProvider>(

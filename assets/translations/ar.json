@@ -9,6 +9,12 @@
     "get_started": "ابدأ الآن"
   },
   "home": {
+    "bottom_nav": {
+      "home": "الرئيسية",
+      "scan": "المسح",
+      "stats": "الإحصائيات",
+      "profile": "الملف الشخصي"
+    },
     "greeting": {
       "today_progress": "تقدم اليوم",
       "morning": "صباح الخير",
@@ -145,6 +151,7 @@
     "highly_active": "نشاط عالي (6-7 أيام/أسبوع)"
   },
   "notification": {
+    "title": "الإشعارات",
     "meal_deleted_title": "تم حذف الوجبة",
     "meal_deleted_body": "تم حذف {mealName} من تقدم اليوم",
     "meal_added_title": "تم إضافة الوجبة",
@@ -156,12 +163,17 @@
     "over_goal_title": "تجاوزت الهدف",
     "over_goal_body": "لقد تجاوزت هدفك اليومي. حان وقت التعديل."
   },
+
   "time": {
     "now": "الآن",
-    "minutes_ago": "{0} دقيقة مضت",
-    "hours_ago": "{0} ساعة مضت",
-    "days_ago": "{0} يوم مضت",
-    "weeks_ago": "{0} أسبوع مضت"
+    "minutes_ago": "دقيقة مضت",
+    "hours_ago": "ساعة مضت",
+    "days_ago": " يوم مضت",
+    "weeks_ago": "أسبوع مضت"
+  },
+
+  "notifications": {
+    "no_notifications": "لا توجد إشعارات"
   },
   "help_center": {
     "title": "مركز المساعدة",
@@ -203,8 +215,8 @@
     "last_updated": "آخر تحديث: 1 يناير 2024"
   },
   "ask_ai": {
-    "title": "جيميناي للطعام",
-    "welcome": "الذكاء الاصطناعي للطعام والتغذية",
+    "title": "AI Assistant",
+    "welcome": "AI Assistant",
     "welcome_subtitle": "اسألني أي شيء عن الطعام والوصفات والتغذية",
     "input_hint": "اسأل أي شيء عن الطعام...",
     "clear_conversation": "مسح المحادثة؟",
@@ -217,7 +229,7 @@
   "food_detail": {
     "food_details": "تفاصيل الطعام",
     "description": "الوصف",
-    "nutrition_facts": "حقائق غذائية"
+    "nutrition_facts": "النتائج"
   },
   "language": {
     "title": "اختر لغتك",

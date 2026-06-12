@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kcalsense/features/home/view/tabs/profile/viewmodel/profile_api_models.dart';
 
+import '../../../../../../core/di/service_locator.dart';
 import '../../../../../setup/model/setup_models.dart';
 import '../../../../../setup/services/metabolic_calculator.dart';
 import '../service/profile_api_service.dart';
@@ -8,7 +9,7 @@ import '../service/profile_local_storage.dart';
 
 class EditProfileViewModel extends ChangeNotifier {
   final ProfileApiService _api = ProfileApiService();
-  final ProfileLocalStorage _local = ProfileLocalStorage();
+  final ProfileLocalStorage _local = sl<ProfileLocalStorage>();
 
   final ageC = TextEditingController();
   final heightC = TextEditingController();
